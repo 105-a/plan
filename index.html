@@ -297,6 +297,42 @@
     .summary-card strong { display: block; font-family: "Yu Mincho", serif; font-size: 22px; font-weight: 500; }
     .summary-card small { color: var(--muted); font-size: 11px; }
 
+    .progress-panel { margin-top: 20px; padding: 22px; }
+    .progress-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 17px; }
+    .progress-title { margin: 0; font-family: "Yu Mincho", serif; font-size: 27px; font-weight: 500; letter-spacing: .06em; }
+    .progress-copy { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .progress-overall { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; padding: 9px 13px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.58); }
+    .progress-overall .icon { color: var(--green); }
+    .progress-overall strong { font-family: "Yu Mincho", serif; font-size: 22px; font-weight: 500; }
+    .progress-overall small { display: block; color: var(--muted); font-size: 9px; }
+    .progress-board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .progress-card {
+      position: relative; min-width: 0; display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: center; gap: 14px;
+      padding: 15px; border: 1px solid var(--line); border-radius: 17px; color: inherit; background: rgba(255,255,255,.58);
+      text-align: left; cursor: pointer; box-shadow: 0 8px 22px rgba(74,54,39,.045); transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    .progress-card:hover { transform: translateY(-2px); background: white; box-shadow: var(--soft-shadow); }
+    .progress-ring {
+      --value: 0; --ring-color: var(--accent); width: 76px; height: 76px; display: grid; place-items: center; border-radius: 50%;
+      background: conic-gradient(var(--ring-color) calc(var(--value) * 1%), rgba(116,91,72,.10) 0);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.65);
+    }
+    .progress-ring::before { content: ""; grid-area: 1 / 1; width: 58px; height: 58px; border-radius: 50%; background: #fffdf9; box-shadow: 0 3px 10px rgba(74,54,39,.08); }
+    .progress-ring strong { grid-area: 1 / 1; z-index: 1; font-family: "Yu Mincho", serif; font-size: 18px; font-weight: 600; }
+    .progress-card-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 700; }
+    .progress-card-meta { margin-top: 5px; color: var(--muted); font-size: 10px; }
+    .progress-task-preview { display: grid; gap: 5px; margin-top: 9px; }
+    .progress-task-preview span { display: flex; align-items: center; gap: 6px; min-width: 0; color: #66564b; font-size: 10px; }
+    .progress-task-preview i { width: 13px; height: 13px; display: grid; place-items: center; flex: 0 0 auto; border: 1px solid var(--line-strong); border-radius: 4px; font-style: normal; }
+    .progress-task-preview span.done { color: #8d837a; text-decoration: line-through; }
+    .progress-task-preview span.done i { color: white; border-color: var(--green); background: var(--green); text-decoration: none; }
+    .progress-task-preview b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+    .progress-edit-hint { position: absolute; right: 11px; top: 10px; color: var(--muted); opacity: .7; }
+    .progress-edit-hint .icon { width: 15px; height: 15px; }
+    .progress-empty { grid-column: 1 / -1; padding: 28px; border: 1px dashed var(--line-strong); border-radius: 17px; color: var(--muted); text-align: center; background: rgba(255,255,255,.28); }
+    .progress-empty .icon { width: 30px; height: 30px; margin-bottom: 8px; color: var(--accent); }
+    .progress-empty strong { display: block; margin-bottom: 5px; color: var(--ink); }
+
     .side-panel { padding: 20px; }
     .side-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
     .side-kicker { color: var(--accent-dark); font-size: 10px; font-weight: 700; letter-spacing: .17em; margin-bottom: 6px; }
@@ -309,7 +345,7 @@
     .search-box input { width: 100%; height: 46px; padding: 0 13px 0 42px; border: 1px solid var(--line); border-radius: 13px; color: var(--ink); background: rgba(255,255,255,.62); }
     .event-list { display: grid; gap: 10px; max-height: 732px; overflow: auto; padding-right: 3px; }
     .list-card {
-      width: 100%; display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 11px;
+      width: 100%; display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 11px;
       padding: 12px; border: 1px solid var(--line); border-radius: 15px;
       background: rgba(255,255,255,.64); color: inherit; text-align: left; cursor: pointer;
       box-shadow: 0 8px 20px rgba(74,54,39,.045); transition: transform .16s ease, background .16s ease;
@@ -321,6 +357,11 @@
     .list-title { font-size: 14px; font-weight: 700; line-height: 1.4; margin-bottom: 4px; }
     .list-meta { color: var(--muted); font-size: 11px; line-height: 1.5; }
     .owner-avatar { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--cat); font-size: 11px; font-weight: 700; }
+    .mini-progress { grid-column: 2 / -1; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 9px; margin-top: -2px; }
+    .mini-progress-label { color: var(--muted); font-size: 9px; }
+    .mini-progress strong { color: var(--cat); font-family: "Yu Mincho", serif; font-size: 12px; font-weight: 700; }
+    .mini-progress-track { grid-column: 1 / -1; height: 6px; overflow: hidden; border-radius: 999px; background: rgba(91,69,52,.09); }
+    .mini-progress-fill { display: block; height: 100%; border-radius: inherit; background: var(--cat); transition: width .3s ease; }
     .empty-state { padding: 34px 14px; border: 1px dashed var(--line-strong); border-radius: 15px; text-align: center; color: var(--muted); background: rgba(255,255,255,.35); }
     .empty-state .icon { width: 34px; height: 34px; margin-bottom: 10px; color: #ad9c8c; }
     .empty-state strong { display: block; margin-bottom: 6px; color: var(--ink); }
@@ -356,6 +397,23 @@
     }
     .field textarea { min-height: 92px; resize: vertical; line-height: 1.6; }
     .field-help { color: var(--muted); font-size: 10px; }
+    .task-field { grid-column: 1 / -1; padding: 15px; border: 1px solid var(--line); border-radius: 15px; background: rgba(248,244,238,.72); }
+    .task-field-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .task-field-title { display: flex; align-items: center; gap: 7px; color: #59473c; font-size: 12px; font-weight: 700; }
+    .task-field-title .icon { color: var(--green); }
+    .task-add { min-height: 34px; padding: 0 11px; border: 1px solid var(--line); border-radius: 10px; color: var(--accent-dark); background: white; cursor: pointer; font-size: 11px; }
+    .task-editor { display: grid; gap: 8px; }
+    .task-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) 34px; align-items: center; gap: 8px; }
+    .task-row input[type="checkbox"] { width: 19px; height: 19px; accent-color: var(--green); cursor: pointer; }
+    .task-row input[type="text"] { width: 100%; min-height: 40px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; color: var(--ink); background: rgba(255,255,255,.82); }
+    .task-remove { width: 34px; height: 34px; display: grid; place-items: center; border: 0; border-radius: 9px; color: #a26262; background: rgba(190,116,116,.09); cursor: pointer; }
+    .task-remove .icon { width: 16px; height: 16px; }
+    .task-empty-note { padding: 12px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); text-align: center; font-size: 10px; }
+    .progress-edit-summary { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 18px; margin-bottom: 18px; padding: 15px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.58); }
+    .progress-edit-summary .progress-ring { width: 82px; height: 82px; }
+    .progress-edit-summary .progress-ring::before { width: 62px; height: 62px; }
+    .progress-edit-summary h3 { margin: 0 0 5px; font-family: "Yu Mincho", serif; font-size: 21px; font-weight: 500; }
+    .progress-edit-summary p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
     .checkbox-row { display: flex; align-items: center; gap: 8px; min-height: 46px; padding-top: 20px; }
     .checkbox-row input { width: 18px; height: 18px; accent-color: var(--accent-dark); }
     .dialog-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 22px; }
@@ -383,6 +441,7 @@
       .event-list { max-height: 520px; }
       .hero { grid-template-columns: 1fr; align-items: start; }
       .month-toolbar { justify-content: flex-start; }
+      .progress-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 760px) {
       .login-card { padding: 28px 22px; border-radius: 24px; }
@@ -420,6 +479,13 @@
       .calendar-summary { grid-template-columns: 1fr; }
       .summary-card { min-height: 58px; }
       .side-panel { padding: 15px; }
+      .progress-panel { padding: 16px; }
+      .progress-head { align-items: flex-start; flex-direction: column; }
+      .progress-overall { width: 100%; }
+      .progress-board { grid-template-columns: 1fr; }
+      .progress-card { grid-template-columns: 68px minmax(0, 1fr); }
+      .progress-ring { width: 68px; height: 68px; }
+      .progress-ring::before { width: 52px; height: 52px; }
       .tips { grid-template-columns: auto 1fr; padding: 14px; }
       .storage-badge { grid-column: 2; justify-self: start; }
       .share-banner { align-items: flex-start; flex-direction: column; }
@@ -538,6 +604,18 @@
       </aside>
     </section>
 
+    <section class="panel progress-panel" aria-labelledby="progressTitle">
+      <div class="progress-head">
+        <div>
+          <div class="side-kicker">PROGRESS</div>
+          <h2 class="progress-title" id="progressTitle">みんなの進捗</h2>
+          <p class="progress-copy">予定ごとのチェックリスト達成率です。カードを選ぶと内容と完了状況を変更できます。</p>
+        </div>
+        <div class="progress-overall"><span class="icon" id="overallProgressIcon"></span><span><strong id="overallProgress">0%</strong><small>全体の達成率</small></span></div>
+      </div>
+      <div class="progress-board" id="progressBoard"></div>
+    </section>
+
     <section class="tips">
       <span class="icon" id="infoIcon"></span>
       <span><strong>リアルタイム共有：</strong>同じURLを開いたメンバー全員に、予定の追加・編集・削除が自動で反映されます。</span>
@@ -563,6 +641,14 @@
         <div class="field full"><label for="eventPlace">場所・URL</label><input id="eventPlace" type="text" maxlength="120" placeholder="例：3F 会議室 / オンラインURL"></div>
         <div class="field full"><label for="eventMembers">参加メンバー</label><input id="eventMembers" type="text" maxlength="160" placeholder="例：佐藤、鈴木、田中"><span class="field-help">読点「、」またはカンマ区切りで入力できます</span></div>
         <div class="field full"><label for="eventMemo">メモ</label><textarea id="eventMemo" maxlength="500" placeholder="持ち物や連絡事項など"></textarea></div>
+        <section class="task-field" aria-labelledby="eventTasksTitle">
+          <div class="task-field-head">
+            <span class="task-field-title" id="eventTasksTitle"><span class="icon" id="eventTasksIcon"></span>進捗チェックリスト</span>
+            <button class="task-add" id="addEventTask" type="button">＋ やることを追加</button>
+          </div>
+          <div class="task-editor" id="eventTasksEditor"></div>
+          <span class="field-help">やることを分けて登録すると、完了した数から進捗率を自動計算します。</span>
+        </section>
       </div>
       <div class="dialog-actions">
         <button class="button danger" id="deleteFromForm" type="button" hidden>この予定を削除</button>
@@ -580,6 +666,25 @@
       <div id="detailContent"></div>
       <div class="dialog-actions"><button class="button danger" id="deleteEventButton" type="button">削除する</button><div class="dialog-actions-right"><button class="button" type="button" data-close="detailDialog">閉じる</button><button class="button primary" id="editEventButton" type="button">編集する</button></div></div>
     </div>
+  </dialog>
+
+  <dialog id="progressDialog" aria-labelledby="progressDialogTitle">
+    <form class="dialog-card" id="progressForm" method="dialog">
+      <div class="dialog-head">
+        <div><div class="dialog-kicker">PROGRESS EDITOR</div><h2 class="dialog-title" id="progressDialogTitle">進捗を更新</h2></div>
+        <button class="close-button" type="button" data-close="progressDialog" aria-label="閉じる"><span class="icon" id="progressCloseIcon"></span></button>
+      </div>
+      <input id="progressEventId" type="hidden">
+      <div class="progress-edit-summary" id="progressEditSummary"></div>
+      <section class="task-field" aria-labelledby="progressTasksTitle">
+        <div class="task-field-head">
+          <span class="task-field-title" id="progressTasksTitle"><span class="icon" id="progressTasksIcon"></span>やること・完了状況</span>
+          <button class="task-add" id="addProgressTask" type="button">＋ やることを追加</button>
+        </div>
+        <div class="task-editor" id="progressTasksEditor"></div>
+      </section>
+      <div class="dialog-actions"><span class="field-help">チェック数に応じてグラフが自動更新されます。</span><div class="dialog-actions-right"><button class="button" type="button" data-close="progressDialog">キャンセル</button><button class="button primary" type="submit">進捗を保存</button></div></div>
+    </form>
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -600,6 +705,10 @@
       close: '<svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>',
       users: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19v-1.5A4.5 4.5 0 0 1 7.5 13h3A4.5 4.5 0 0 1 15 17.5V19M16 5.5a3 3 0 0 1 0 5.8M17 13a4 4 0 0 1 4 4v2"/></svg>',
       clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+      progress: '<svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/><path d="M2 19h20"/></svg>',
+      check: '<svg viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"/></svg>',
+      edit: '<svg viewBox="0 0 24 24"><path d="m14.5 5.5 4 4M5 19l2.5-6.5L16 4l4 4-8.5 8.5Z"/><path d="M12 20H4v-8"/></svg>',
+      trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>',
       meeting: '<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20v-2a4.5 4.5 0 0 1 4.5-4.5h2A4.5 4.5 0 0 1 13.5 18v2M14 14a4 4 0 0 1 7.5 2v4"/></svg>',
       project: '<svg viewBox="0 0 24 24"><path d="M4 20V6.5A1.5 1.5 0 0 1 5.5 5h4L11 7h7.5A1.5 1.5 0 0 1 20 8.5V20Z"/><path d="M8 12h8M8 16h5"/></svg>',
       outing: '<svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/></svg>',
@@ -643,6 +752,21 @@
     let realtimeRefreshTimer = null;
     let events = [];
 
+    function normalizeTasks(source) {
+      if (!Array.isArray(source)) return [];
+      return source.slice(0, 30).map(task => ({
+        id: /^[0-9a-f-]{20,}$/i.test(String(task?.id || '')) ? String(task.id) : uid(),
+        title: String(task?.title || '').trim().slice(0, 80),
+        completed: Boolean(task?.completed)
+      })).filter(task => task.title);
+    }
+
+    function progressOf(eventOrTasks) {
+      const tasks = Array.isArray(eventOrTasks) ? normalizeTasks(eventOrTasks) : normalizeTasks(eventOrTasks?.tasks);
+      const done = tasks.filter(task => task.completed).length;
+      return { tasks, done, total: tasks.length, percent: tasks.length ? Math.round(done / tasks.length * 100) : 0 };
+    }
+
     function normalizeEvent(raw) {
       if (!raw || typeof raw !== 'object' || !/^\d{4}-\d{2}-\d{2}$/.test(raw.date || '') || !String(raw.title || '').trim()) return null;
       return {
@@ -656,7 +780,8 @@
         place: String(raw.place || '').slice(0, 120),
         owner: String(raw.owner || '').slice(0, 30),
         members: Array.isArray(raw.members) ? raw.members.map(v => String(v).trim()).filter(Boolean).slice(0, 30) : [],
-        memo: String(raw.memo || '').slice(0, 500)
+        memo: String(raw.memo || '').slice(0, 500),
+        tasks: normalizeTasks(raw.tasks)
       };
     }
 
@@ -672,7 +797,8 @@
         place: row.place,
         owner: row.owner_name,
         members: row.members,
-        memo: row.memo
+        memo: row.memo,
+        tasks: row.tasks
       });
     }
 
@@ -689,6 +815,7 @@
         owner_name: event.owner,
         members: event.members,
         memo: event.memo,
+        tasks: normalizeTasks(event.tasks),
         updated_at: new Date().toISOString()
       };
     }
@@ -704,7 +831,7 @@
       if (!quiet) setSyncStatus('同期中…');
       const { data, error } = await supabase
         .from('calendar_events')
-        .select('id,title,event_date,start_time,end_time,all_day,category,place,owner_name,members,memo,updated_at')
+        .select('id,title,event_date,start_time,end_time,all_day,category,place,owner_name,members,memo,tasks,updated_at')
         .order('event_date', { ascending: true })
         .order('start_time', { ascending: true, nullsFirst: true });
       if (error) {
@@ -890,15 +1017,74 @@
         const cat = category(event.category);
         const date = parseLocalDate(event.date);
         const initial = (event.owner || '—').trim().slice(0,1);
-        return `<button type="button" class="list-card" data-event-id="${escapeHtml(event.id)}" style="--cat:${cat.color}"><span class="list-date"><strong>${date.getDate()}</strong><small>${date.getMonth()+1}月・${'日月火水木金土'[date.getDay()]}</small></span><span><span class="list-title">${escapeHtml(event.title)}</span><span class="list-meta">${escapeHtml(eventTime(event))}${event.place ? ` ・ ${escapeHtml(event.place)}` : ''}<br>${escapeHtml(cat.name)}${event.owner ? ` ・ 担当 ${escapeHtml(event.owner)}` : ''}</span></span><span class="owner-avatar" aria-label="担当 ${escapeHtml(event.owner || '未設定')}">${escapeHtml(initial)}</span></button>`;
+        const progress = progressOf(event);
+        return `<button type="button" class="list-card" data-event-id="${escapeHtml(event.id)}" style="--cat:${cat.color}"><span class="list-date"><strong>${date.getDate()}</strong><small>${date.getMonth()+1}月・${'日月火水木金土'[date.getDay()]}</small></span><span><span class="list-title">${escapeHtml(event.title)}</span><span class="list-meta">${escapeHtml(eventTime(event))}${event.place ? ` ・ ${escapeHtml(event.place)}` : ''}<br>${escapeHtml(cat.name)}${event.owner ? ` ・ 担当 ${escapeHtml(event.owner)}` : ''}</span></span><span class="owner-avatar" aria-label="担当 ${escapeHtml(event.owner || '未設定')}">${escapeHtml(initial)}</span><span class="mini-progress"><span class="mini-progress-label">${progress.total ? `${progress.done}/${progress.total} 完了` : 'タスク未設定'}</span><strong>${progress.percent}%</strong><span class="mini-progress-track"><span class="mini-progress-fill" style="width:${progress.percent}%"></span></span></span></button>`;
       }).join('');
       $('eventList').querySelectorAll('[data-event-id]').forEach(button => button.addEventListener('click', () => openDetail(button.dataset.eventId)));
+    }
+
+    function renderProgressBoard() {
+      const today = toDateString(new Date());
+      let list = filteredEvents().filter(event => event.date >= today).sort((a,b) => a.date.localeCompare(b.date) || (a.start || '').localeCompare(b.start || ''));
+      if (!list.length) list = filteredEvents().sort((a,b) => b.date.localeCompare(a.date));
+      list = list.slice(0, 9);
+      const allTasks = events.flatMap(event => normalizeTasks(event.tasks));
+      const done = allTasks.filter(task => task.completed).length;
+      $('overallProgress').textContent = `${allTasks.length ? Math.round(done / allTasks.length * 100) : 0}%`;
+      if (!list.length) {
+        $('progressBoard').innerHTML = `<div class="progress-empty">${icon('progress')}<strong>進捗セクションはまだありません</strong><span>予定を追加するときに「やること」を登録すると、ここにグラフが表示されます。</span></div>`;
+        return;
+      }
+      $('progressBoard').innerHTML = list.map(event => {
+        const cat = category(event.category);
+        const progress = progressOf(event);
+        const preview = progress.tasks.length
+          ? progress.tasks.slice(0, 3).map(task => `<span class="${task.completed ? 'done' : ''}"><i>${task.completed ? '✓' : ''}</i><b>${escapeHtml(task.title)}</b></span>`).join('')
+          : `<span><i></i><b>クリックして、やることを追加</b></span>`;
+        return `<button type="button" class="progress-card" data-progress-id="${escapeHtml(event.id)}" style="--cat:${cat.color}"><span class="progress-ring" style="--value:${progress.percent};--ring-color:${cat.color}"><strong>${progress.percent}%</strong></span><span><span class="progress-card-title">${escapeHtml(event.title)}</span><span class="progress-card-meta">${escapeHtml(event.owner || '担当者未設定')} ・ ${progress.done}/${progress.total} 完了</span><span class="progress-task-preview">${preview}</span></span><span class="progress-edit-hint">${icon('edit')}</span></button>`;
+      }).join('');
+      $('progressBoard').querySelectorAll('[data-progress-id]').forEach(button => button.addEventListener('click', () => openProgressEditor(button.dataset.progressId)));
     }
 
     function renderAll() {
       renderCategoryBar();
       renderCalendar();
       renderEventList();
+      renderProgressBoard();
+    }
+
+    function collectTasks(containerId) {
+      return normalizeTasks([...$(containerId).querySelectorAll('.task-row')].map(row => ({
+        id: row.dataset.taskId,
+        title: row.querySelector('input[type="text"]').value,
+        completed: row.querySelector('input[type="checkbox"]').checked
+      })));
+    }
+
+    function renderTaskEditor(containerId, tasks = [], { startWithBlank = false } = {}) {
+      const editable = Array.isArray(tasks) ? tasks.slice(0, 30).map(task => ({
+        id: /^[0-9a-f-]{20,}$/i.test(String(task?.id || '')) ? String(task.id) : uid(),
+        title: String(task?.title || '').slice(0, 80),
+        completed: Boolean(task?.completed)
+      })) : [];
+      const rows = editable.length ? editable : (startWithBlank ? [{ id: uid(), title: '', completed: false }] : []);
+      const container = $(containerId);
+      container.innerHTML = rows.length ? rows.map(task => `<div class="task-row" data-task-id="${escapeHtml(task.id)}"><input type="checkbox" ${task.completed ? 'checked' : ''} aria-label="完了"><input type="text" maxlength="80" value="${escapeHtml(task.title)}" placeholder="例：資料を作成"><button class="task-remove" type="button" aria-label="この項目を削除">${icon('trash')}</button></div>`).join('') : `<div class="task-empty-note">「やることを追加」から項目を作成できます</div>`;
+      container.querySelectorAll('.task-remove').forEach(button => button.addEventListener('click', () => {
+        button.closest('.task-row').remove();
+        if (!container.querySelector('.task-row')) container.innerHTML = `<div class="task-empty-note">「やることを追加」から項目を作成できます</div>`;
+        if (containerId === 'progressTasksEditor') updateProgressEditSummary();
+      }));
+      if (containerId === 'progressTasksEditor') container.querySelectorAll('input').forEach(input => input.addEventListener('input', updateProgressEditSummary));
+    }
+
+    function addTaskRow(containerId) {
+      const tasks = collectTasks(containerId);
+      if (tasks.length >= 30) { toast('やることは30件まで登録できます'); return; }
+      tasks.push({ id: uid(), title: '', completed: false });
+      renderTaskEditor(containerId, tasks);
+      const inputs = $(containerId).querySelectorAll('input[type="text"]');
+      inputs[inputs.length - 1]?.focus();
     }
 
     function openEventForm(event = null, presetDate = null) {
@@ -915,6 +1101,7 @@
       $('eventPlace').value = event?.place || '';
       $('eventMembers').value = event?.members?.join('、') || '';
       $('eventMemo').value = event?.memo || '';
+      renderTaskEditor('eventTasksEditor', event?.tasks || [], { startWithBlank: !editing });
       $('deleteFromForm').hidden = !editing;
       updateTimeFields();
       $('eventDialog').showModal();
@@ -933,8 +1120,27 @@
       selectedEventId = id;
       const cat = category(event.category);
       const members = event.members.length ? event.members.join('、') : '未設定';
-      $('detailContent').innerHTML = `<div class="detail-hero" style="--cat:${cat.color}"><span class="detail-icon">${icon(cat.id)}</span><span><span class="detail-category">${escapeHtml(cat.name)}</span><h3 class="detail-event-title" id="detailTitle">${escapeHtml(event.title)}</h3></span></div><div class="detail-grid"><div class="detail-item"><strong>日時</strong>${escapeHtml(dateLabel(event.date, true))}<br>${escapeHtml(eventTime(event))}</div><div class="detail-item"><strong>場所・URL</strong>${escapeHtml(event.place || '未設定')}</div><div class="detail-item"><strong>担当者</strong>${escapeHtml(event.owner || '未設定')}</div><div class="detail-item"><strong>参加メンバー</strong>${escapeHtml(members)}</div><div class="detail-item full"><strong>メモ</strong>${event.memo ? escapeHtml(event.memo).replace(/\n/g, '<br>') : 'メモはありません。'}</div></div>`;
+      const progress = progressOf(event);
+      const taskDetail = progress.tasks.length ? progress.tasks.map(task => `${task.completed ? '✓' : '□'} ${escapeHtml(task.title)}`).join('<br>') : 'やることは未設定です。';
+      $('detailContent').innerHTML = `<div class="detail-hero" style="--cat:${cat.color}"><span class="detail-icon">${icon(cat.id)}</span><span><span class="detail-category">${escapeHtml(cat.name)}</span><h3 class="detail-event-title" id="detailTitle">${escapeHtml(event.title)}</h3></span></div><div class="detail-grid"><div class="detail-item"><strong>日時</strong>${escapeHtml(dateLabel(event.date, true))}<br>${escapeHtml(eventTime(event))}</div><div class="detail-item"><strong>場所・URL</strong>${escapeHtml(event.place || '未設定')}</div><div class="detail-item"><strong>担当者</strong>${escapeHtml(event.owner || '未設定')}</div><div class="detail-item"><strong>参加メンバー</strong>${escapeHtml(members)}</div><div class="detail-item full"><strong>進捗 ${progress.percent}%（${progress.done}/${progress.total} 完了）</strong>${taskDetail}</div><div class="detail-item full"><strong>メモ</strong>${event.memo ? escapeHtml(event.memo).replace(/\n/g, '<br>') : 'メモはありません。'}</div></div>`;
       $('detailDialog').showModal();
+    }
+
+    function updateProgressEditSummary() {
+      const event = events.find(item => item.id === $('progressEventId').value);
+      if (!event) return;
+      const progress = progressOf(collectTasks('progressTasksEditor'));
+      const cat = category(event.category);
+      $('progressEditSummary').innerHTML = `<span class="progress-ring" style="--value:${progress.percent};--ring-color:${cat.color}"><strong>${progress.percent}%</strong></span><span><h3>${escapeHtml(event.title)}</h3><p>${progress.done}件完了 / 全${progress.total}件<br>チェックした割合から自動で計算しています。</p></span>`;
+    }
+
+    function openProgressEditor(id) {
+      const event = events.find(item => item.id === id);
+      if (!event) return;
+      $('progressEventId').value = id;
+      renderTaskEditor('progressTasksEditor', event.tasks);
+      updateProgressEditSummary();
+      $('progressDialog').showModal();
     }
 
     async function deleteEvent(id) {
@@ -956,7 +1162,7 @@
     }
 
     function exportData() {
-      const payload = { app: 'YORI Calendar', version: 1, exportedAt: new Date().toISOString(), events };
+      const payload = { app: 'YORI Calendar', version: 2, exportedAt: new Date().toISOString(), events };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -1011,7 +1217,9 @@
     setIcon('brandIcon', 'calendar'); setIcon('exportIcon', 'download'); setIcon('importIcon', 'upload'); setIcon('shareIcon', 'share');
     setIcon('logoutIcon', 'logout');
     setIcon('plusIcon', 'plus'); setIcon('searchIcon', 'search'); setIcon('infoIcon', 'info'); setIcon('monthCountIcon', 'calendar');
-    setIcon('memberCountIcon', 'users'); setIcon('nextEventIcon', 'clock'); setIcon('formCloseIcon', 'close'); setIcon('detailCloseIcon', 'close');
+    setIcon('memberCountIcon', 'users'); setIcon('nextEventIcon', 'clock'); setIcon('overallProgressIcon', 'progress');
+    setIcon('eventTasksIcon', 'check'); setIcon('progressTasksIcon', 'check');
+    setIcon('formCloseIcon', 'close'); setIcon('detailCloseIcon', 'close'); setIcon('progressCloseIcon', 'close');
     $('eventCategory').innerHTML = CATEGORIES.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
 
     $('previousMonth').addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1); renderAll(); });
@@ -1020,6 +1228,8 @@
     $('monthLabel').addEventListener('click', () => { if ($('monthPicker').showPicker) $('monthPicker').showPicker(); else $('monthPicker').click(); });
     $('monthPicker').addEventListener('change', event => { if (!event.target.value) return; const [year, month] = event.target.value.split('-').map(Number); viewDate = new Date(year, month-1, 1); renderAll(); });
     $('newEventButton').addEventListener('click', () => openEventForm(null, toDateString(selectedDate)));
+    $('addEventTask').addEventListener('click', () => addTaskRow('eventTasksEditor'));
+    $('addProgressTask').addEventListener('click', () => { addTaskRow('progressTasksEditor'); updateProgressEditSummary(); });
     $('allDay').addEventListener('change', updateTimeFields);
     $('searchInput').addEventListener('input', event => { searchQuery = event.target.value.trim(); renderAll(); });
     $('exportButton').addEventListener('click', exportData);
@@ -1086,7 +1296,8 @@
         owner: $('eventOwner').value,
         place: $('eventPlace').value,
         members: $('eventMembers').value.split(/[、,]/).map(v => v.trim()).filter(Boolean),
-        memo: $('eventMemo').value
+        memo: $('eventMemo').value,
+        tasks: collectTasks('eventTasksEditor')
       });
       if (!item) { alert('予定名と日付を入力してください。'); return; }
       if (!item.allDay && item.start && item.end && item.end < item.start) { alert('終了時刻は開始時刻より後に設定してください。'); return; }
@@ -1107,6 +1318,28 @@
       } finally {
         submitButton.disabled = false;
         submitButton.textContent = '保存する';
+      }
+    });
+
+    $('progressForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const item = events.find(existing => existing.id === $('progressEventId').value);
+      if (!item) return;
+      const updated = normalizeEvent({ ...item, tasks: collectTasks('progressTasksEditor') });
+      const submitButton = $('progressForm').querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = '保存中…';
+      try {
+        await saveEventToCloud(updated, true);
+        $('progressDialog').close();
+        renderAll();
+        toast('進捗を更新しました');
+      } catch (error) {
+        console.error(error);
+        alert(`進捗を保存できませんでした。\n${error.message}`);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = '進捗を保存';
       }
     });
 
