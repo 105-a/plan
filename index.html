@@ -177,7 +177,7 @@
       box-shadow: 0 9px 20px rgba(139, 92, 61, .22);
     }
     .brand-mark .icon { width: 24px; height: 24px; }
-    .brand-name { font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: 20px; letter-spacing: .09em; }
+    .brand-name { font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: 20px; letter-spacing: .09em; white-space: nowrap; }
     .brand-sub { color: var(--muted); font-size: 10px; letter-spacing: .17em; margin-top: 2px; }
     .top-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
     .button {
@@ -199,6 +199,13 @@
     .button.primary:hover { background: #704b34; }
     .button.danger { color: #a84d4d; border-color: rgba(168,77,77,.25); }
     .button.icon-only { width: 44px; padding: 0; }
+    .profile-button { max-width: 190px; padding-left: 8px; }
+    .profile-avatar {
+      width: 30px; height: 30px; display: grid; place-items: center; flex: 0 0 auto;
+      border-radius: 50%; color: white; background: linear-gradient(145deg, #8da086, #687c67);
+      font-family: "Yu Mincho", serif; font-size: 13px; font-weight: 700;
+    }
+    .profile-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .share-banner {
       display: none;
@@ -290,7 +297,9 @@
     .more-events { margin: 5px 0 0 8px; color: var(--muted); font-size: 10px; }
 
     .calendar-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
-    .summary-card { min-height: 70px; display: flex; align-items: center; gap: 12px; padding: 12px 15px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.55); }
+    .summary-card { min-height: 70px; display: flex; align-items: center; gap: 12px; padding: 12px 15px; border: 1px solid var(--line); border-radius: 15px; color: inherit; background: rgba(255,255,255,.55); text-align: left; }
+    .summary-button { width: 100%; cursor: pointer; transition: transform .18s ease, background .18s ease, box-shadow .18s ease; }
+    .summary-button:hover { transform: translateY(-1px); background: white; box-shadow: var(--soft-shadow); }
     .summary-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; color: var(--accent-dark); background: #f3e5d7; }
     .summary-icon.green { color: #58715b; background: #e4eee3; }
     .summary-icon.blue { color: #587386; background: #e1ebef; }
@@ -427,6 +436,19 @@
     .detail-item { padding: 13px 14px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.57); color: #5f5046; font-size: 13px; line-height: 1.65; }
     .detail-item.full { grid-column: 1 / -1; }
     .detail-item strong { display: block; color: var(--ink); margin-bottom: 3px; font-size: 11px; }
+    .profile-intro { display: grid; grid-template-columns: 58px 1fr; align-items: center; gap: 15px; margin-bottom: 18px; padding: 15px; border: 1px solid var(--line); border-radius: 16px; background: rgba(246,241,234,.68); }
+    .profile-intro-icon { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 50%; color: #58715b; background: #e4eee3; }
+    .profile-intro-icon .icon { width: 29px; height: 29px; }
+    .profile-intro strong { display: block; margin-bottom: 5px; font-family: "Yu Mincho", serif; font-size: 19px; font-weight: 500; }
+    .profile-intro span { color: var(--muted); font-size: 11px; line-height: 1.7; }
+    .profile-error { min-height: 20px; margin: 8px 2px 0; color: #aa5555; font-size: 11px; }
+    .members-list { display: grid; gap: 9px; }
+    .member-row { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.62); }
+    .member-avatar { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: white; background: linear-gradient(145deg, #9aa891, #71816e); font-family: "Yu Mincho", serif; font-size: 17px; font-weight: 700; }
+    .member-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+    .member-meta { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .current-member-badge { padding: 5px 9px; border-radius: 999px; color: #5f745f; background: #e5eee3; white-space: nowrap; font-size: 9px; font-weight: 700; }
+    .members-empty { padding: 28px 15px; border: 1px dashed var(--line-strong); border-radius: 15px; color: var(--muted); text-align: center; }
 
     .toast {
       position: fixed; left: 50%; bottom: 24px; z-index: 100;
@@ -455,6 +477,7 @@
       .brand-sub { display: none; }
       .top-actions .button span.label { display: none; }
       .top-actions .button { width: 42px; min-height: 42px; padding: 0; }
+      .top-actions .profile-button { width: 42px; padding: 5px; }
       .hero { padding: 30px 8px 18px; gap: 20px; }
       .hero h1 { font-size: 35px; }
       .hero-copy { font-size: 12px; }
@@ -557,6 +580,7 @@
         <button class="button" id="exportButton" type="button"><span class="icon" id="exportIcon"></span><span class="label">書き出す</span></button>
         <button class="button" id="importButton" type="button"><span class="icon" id="importIcon"></span><span class="label">読み込む</span></button>
         <button class="button primary" id="shareButton" type="button"><span class="icon" id="shareIcon"></span><span class="label">共有リンク</span></button>
+        <button class="button profile-button" id="profileButton" type="button" aria-label="表示名を設定"><span class="profile-avatar" id="profileAvatar">?</span><span class="label profile-name" id="profileName">表示名設定</span></button>
         <button class="button" id="logoutButton" type="button"><span class="icon" id="logoutIcon"></span><span class="label">ログアウト</span></button>
         <input class="sr-only" id="importFile" type="file" accept="application/json,.json">
       </div>
@@ -589,7 +613,7 @@
         <div class="calendar-grid" id="calendarGrid"></div>
         <div class="calendar-summary">
           <div class="summary-card"><span class="summary-icon" id="monthCountIcon"></span><span><strong id="monthCount">0件</strong><small>今月の予定</small></span></div>
-          <div class="summary-card"><span class="summary-icon green" id="memberCountIcon"></span><span><strong id="memberCount">0人</strong><small>担当メンバー</small></span></div>
+          <button class="summary-card summary-button" id="memberSummaryButton" type="button" aria-label="登録メンバーを見る"><span class="summary-icon green" id="memberCountIcon"></span><span><strong id="memberCount">0人</strong><small>担当メンバー・一覧を見る</small></span></button>
           <div class="summary-card"><span class="summary-icon blue" id="nextEventIcon"></span><span><strong id="nextEventText">—</strong><small>次の予定まで</small></span></div>
         </div>
       </section>
@@ -637,7 +661,7 @@
         <div class="field"><label for="startTime">開始時刻</label><input id="startTime" type="time" value="10:00"></div>
         <div class="field"><label for="endTime">終了時刻</label><input id="endTime" type="time" value="11:00"></div>
         <div class="field"><label for="eventCategory">カテゴリ</label><select id="eventCategory"></select></div>
-        <div class="field"><label for="eventOwner">担当者</label><input id="eventOwner" type="text" maxlength="30" placeholder="例：佐藤"></div>
+        <div class="field"><label for="eventOwner">担当者</label><input id="eventOwner" type="text" maxlength="30" list="memberOptions" placeholder="登録メンバーから選択"><datalist id="memberOptions"></datalist></div>
         <div class="field full"><label for="eventPlace">場所・URL</label><input id="eventPlace" type="text" maxlength="120" placeholder="例：3F 会議室 / オンラインURL"></div>
         <div class="field full"><label for="eventMembers">参加メンバー</label><input id="eventMembers" type="text" maxlength="160" placeholder="例：佐藤、鈴木、田中"><span class="field-help">読点「、」またはカンマ区切りで入力できます</span></div>
         <div class="field full"><label for="eventMemo">メモ</label><textarea id="eventMemo" maxlength="500" placeholder="持ち物や連絡事項など"></textarea></div>
@@ -687,6 +711,30 @@
     </form>
   </dialog>
 
+  <dialog id="profileDialog" aria-labelledby="profileDialogTitle">
+    <form class="dialog-card" id="profileForm" method="dialog">
+      <div class="dialog-head">
+        <div><div class="dialog-kicker">YOUR PROFILE</div><h2 class="dialog-title" id="profileDialogTitle">表示名を決める</h2></div>
+        <button class="close-button" id="profileCloseButton" type="button" data-close="profileDialog" aria-label="閉じる"><span class="icon" id="profileCloseIcon"></span></button>
+      </div>
+      <div class="profile-intro"><span class="profile-intro-icon" id="profileUsersIcon"></span><span><strong>チームで使う名前</strong><span>予定の担当者選択とメンバー一覧に、この名前が表示されます。</span></span></div>
+      <div class="field"><label for="profileDisplayName">アカウント名 *</label><input id="profileDisplayName" type="text" maxlength="30" autocomplete="nickname" placeholder="例：佐藤" required><span class="field-help">1〜30文字。同じ名前は重複して登録できません。</span></div>
+      <p class="profile-error" id="profileError" role="alert"></p>
+      <div class="dialog-actions"><span class="field-help">この端末に登録情報を記憶します。</span><div class="dialog-actions-right"><button class="button" id="profileCancelButton" type="button" data-close="profileDialog">キャンセル</button><button class="button primary" type="submit">この名前で登録</button></div></div>
+    </form>
+  </dialog>
+
+  <dialog id="membersDialog" aria-labelledby="membersDialogTitle">
+    <div class="dialog-card">
+      <div class="dialog-head">
+        <div><div class="dialog-kicker">TEAM MEMBERS</div><h2 class="dialog-title" id="membersDialogTitle">担当メンバー</h2></div>
+        <button class="close-button" type="button" data-close="membersDialog" aria-label="閉じる"><span class="icon" id="membersCloseIcon"></span></button>
+      </div>
+      <div class="members-list" id="membersList"></div>
+      <div class="dialog-actions"><span class="field-help">同じURLを使うメンバーの表示名です。</span><div class="dialog-actions-right"><button class="button" type="button" data-close="membersDialog">閉じる</button><button class="button primary" id="editProfileButton" type="button">自分の表示名を変更</button></div></div>
+    </div>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script type="module">
@@ -729,6 +777,7 @@
     const SUPABASE_URL = 'https://cefxqauiezsqzbaluupk.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_HATCfyLEFds4vtIb_s4k3Q_YWKL8L4O';
     const TEAM_EMAIL = 'yori-calendar@example.com';
+    const MEMBER_ID_STORAGE = 'yori-calendar-member-id-v1';
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
     });
@@ -750,6 +799,11 @@
     let toastTimer;
     let realtimeChannel = null;
     let realtimeRefreshTimer = null;
+    let membersRealtimeChannel = null;
+    let membersRealtimeRefreshTimer = null;
+    let teamMembers = [];
+    let currentMemberId = null;
+    let profileRequired = false;
     let events = [];
 
     function normalizeTasks(source) {
@@ -827,6 +881,83 @@
       if (state !== 'online') badge.classList.add(state);
     }
 
+    function readMemberId() {
+      try {
+        const stored = localStorage.getItem(MEMBER_ID_STORAGE);
+        return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(stored || '') ? stored : null;
+      } catch { return null; }
+    }
+
+    function rememberMemberId(id) {
+      try { localStorage.setItem(MEMBER_ID_STORAGE, id); } catch { /* ブラウザが保存を制限している場合は今回のセッションだけで利用 */ }
+    }
+
+    function currentMember() {
+      return teamMembers.find(member => member.id === currentMemberId) || null;
+    }
+
+    function memberInitial(name) {
+      return String(name || '?').trim().slice(0, 1).toLocaleUpperCase('ja') || '?';
+    }
+
+    function renderMemberUi() {
+      const mine = currentMember();
+      $('memberCount').textContent = `${teamMembers.length}人`;
+      $('profileAvatar').textContent = memberInitial(mine?.displayName);
+      $('profileName').textContent = mine?.displayName || '表示名設定';
+      $('profileButton').setAttribute('aria-label', mine ? `${mine.displayName}の表示名を変更` : '表示名を設定');
+      $('memberOptions').innerHTML = teamMembers.map(member => `<option value="${escapeHtml(member.displayName)}"></option>`).join('');
+      renderMembersList();
+    }
+
+    function renderMembersList() {
+      $('membersList').innerHTML = teamMembers.length
+        ? teamMembers.map(member => `<div class="member-row"><span class="member-avatar">${escapeHtml(memberInitial(member.displayName))}</span><span><span class="member-name">${escapeHtml(member.displayName)}</span><span class="member-meta">共有カレンダーの登録メンバー</span></span>${member.id === currentMemberId ? '<span class="current-member-badge">この端末</span>' : ''}</div>`).join('')
+        : '<div class="members-empty">登録メンバーはまだいません。</div>';
+    }
+
+    async function loadMembersFromCloud() {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('id,display_name,created_at,updated_at')
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      teamMembers = (data || []).map(row => ({
+        id: row.id,
+        displayName: String(row.display_name || '').trim().slice(0, 30),
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      })).filter(member => member.displayName);
+      renderMemberUi();
+    }
+
+    async function subscribeMembersRealtime() {
+      if (membersRealtimeChannel) await supabase.removeChannel(membersRealtimeChannel);
+      membersRealtimeChannel = supabase
+        .channel('yori-calendar-members')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'team_members' }, () => {
+          clearTimeout(membersRealtimeRefreshTimer);
+          membersRealtimeRefreshTimer = setTimeout(() => {
+            loadMembersFromCloud().catch(() => toast('最新のメンバーを取得できませんでした'));
+          }, 120);
+        })
+        .subscribe();
+    }
+
+    function openProfileEditor(required = false) {
+      profileRequired = required;
+      const mine = currentMember();
+      $('profileDialogTitle').textContent = required ? 'はじめに表示名を決める' : '表示名を変更';
+      $('profileDisplayName').value = mine?.displayName || '';
+      $('profileError').textContent = '';
+      $('profileCloseButton').hidden = required;
+      $('profileCancelButton').hidden = required;
+      const submit = $('profileForm').querySelector('button[type="submit"]');
+      submit.textContent = required ? 'この名前ではじめる' : '表示名を保存';
+      if (!$('profileDialog').open) $('profileDialog').showModal();
+      requestAnimationFrame(() => $('profileDisplayName').focus());
+    }
+
     async function loadEventsFromCloud({ quiet = false } = {}) {
       if (!quiet) setSyncStatus('同期中…');
       const { data, error } = await supabase
@@ -870,8 +1001,10 @@
       $('loginScreen').hidden = true;
       $('calendarApp').hidden = false;
       try {
-        await loadEventsFromCloud();
-        await subscribeRealtime();
+        currentMemberId = readMemberId() || uid();
+        await Promise.all([loadEventsFromCloud(), loadMembersFromCloud()]);
+        await Promise.all([subscribeRealtime(), subscribeMembersRealtime()]);
+        if (!currentMember()) openProfileEditor(true);
       } catch (error) {
         console.error(error);
         toast('Supabaseへ接続できませんでした');
@@ -880,8 +1013,13 @@
 
     async function lockCalendar() {
       if (realtimeChannel) await supabase.removeChannel(realtimeChannel);
+      if (membersRealtimeChannel) await supabase.removeChannel(membersRealtimeChannel);
       realtimeChannel = null;
+      membersRealtimeChannel = null;
       events = [];
+      teamMembers = [];
+      profileRequired = false;
+      ['eventDialog', 'detailDialog', 'progressDialog', 'profileDialog', 'membersDialog'].forEach(id => { if ($(id)?.open) $(id).close(); });
       $('calendarApp').hidden = true;
       $('loginScreen').hidden = false;
       $('loginPassword').value = '';
@@ -993,8 +1131,7 @@
     function renderSummary() {
       const current = monthEvents();
       $('monthCount').textContent = `${current.length}件`;
-      const members = new Set(current.flatMap(event => [event.owner, ...event.members]).filter(Boolean));
-      $('memberCount').textContent = `${members.size}人`;
+      $('memberCount').textContent = `${teamMembers.length}人`;
       const today = toDateString(new Date());
       const next = [...events].filter(event => event.date >= today).sort((a,b) => a.date.localeCompare(b.date) || (a.start || '').localeCompare(b.start || ''))[0];
       if (!next) $('nextEventText').textContent = '—';
@@ -1097,7 +1234,7 @@
       $('startTime').value = event?.start || '10:00';
       $('endTime').value = event?.end || '11:00';
       $('eventCategory').value = event?.category || 'meeting';
-      $('eventOwner').value = event?.owner || '';
+      $('eventOwner').value = event?.owner || currentMember()?.displayName || '';
       $('eventPlace').value = event?.place || '';
       $('eventMembers').value = event?.members?.join('、') || '';
       $('eventMemo').value = event?.memo || '';
@@ -1220,6 +1357,7 @@
     setIcon('memberCountIcon', 'users'); setIcon('nextEventIcon', 'clock'); setIcon('overallProgressIcon', 'progress');
     setIcon('eventTasksIcon', 'check'); setIcon('progressTasksIcon', 'check');
     setIcon('formCloseIcon', 'close'); setIcon('detailCloseIcon', 'close'); setIcon('progressCloseIcon', 'close');
+    setIcon('profileCloseIcon', 'close'); setIcon('membersCloseIcon', 'close'); setIcon('profileUsersIcon', 'users');
     $('eventCategory').innerHTML = CATEGORIES.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
 
     $('previousMonth').addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1); renderAll(); });
@@ -1235,6 +1373,9 @@
     $('exportButton').addEventListener('click', exportData);
     $('importButton').addEventListener('click', () => $('importFile').click());
     $('shareButton').addEventListener('click', createShareLink);
+    $('profileButton').addEventListener('click', () => openProfileEditor(!currentMember()));
+    $('memberSummaryButton').addEventListener('click', () => { renderMembersList(); $('membersDialog').showModal(); });
+    $('editProfileButton').addEventListener('click', () => { $('membersDialog').close(); openProfileEditor(!currentMember()); });
     $('logoutButton').addEventListener('click', async () => {
       await supabase.auth.signOut();
       await lockCalendar();
@@ -1269,6 +1410,39 @@
       } finally {
         button.disabled = false;
         button.textContent = 'カレンダーを開く';
+      }
+    });
+    $('profileForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const displayName = $('profileDisplayName').value.trim();
+      const submitButton = $('profileForm').querySelector('button[type="submit"]');
+      $('profileError').textContent = '';
+      if (!displayName) { $('profileError').textContent = '表示名を入力してください。'; return; }
+      submitButton.disabled = true;
+      submitButton.textContent = '保存しています…';
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) throw userError || new Error('ログイン情報を確認できません');
+        const { error } = await supabase.from('team_members').upsert({
+          id: currentMemberId,
+          display_name: displayName,
+          created_by: user.id,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+        if (error) throw error;
+        rememberMemberId(currentMemberId);
+        await loadMembersFromCloud();
+        profileRequired = false;
+        $('profileDialog').close();
+        toast('表示名を登録しました');
+      } catch (error) {
+        console.error(error);
+        $('profileError').textContent = error?.code === '23505'
+          ? 'その表示名はすでに使われています。別の名前を入力してください。'
+          : `表示名を保存できませんでした。${error?.message || ''}`;
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = profileRequired ? 'この名前ではじめる' : '表示名を保存';
       }
     });
     $('importFile').addEventListener('change', async event => {
@@ -1352,8 +1526,10 @@
     $('deleteEventButton').addEventListener('click', () => deleteEvent(selectedEventId));
     $('deleteFromForm').addEventListener('click', () => deleteEvent($('eventId').value));
     document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => $(button.dataset.close).close()));
+    $('profileDialog').addEventListener('cancel', event => { if (profileRequired) event.preventDefault(); });
     document.querySelectorAll('dialog').forEach(dialog => dialog.addEventListener('click', event => {
       const box = dialog.querySelector('.dialog-card').getBoundingClientRect();
+      if (dialog.id === 'profileDialog' && profileRequired) return;
       if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) dialog.close();
     }));
     supabase.auth.onAuthStateChange((event, session) => {
