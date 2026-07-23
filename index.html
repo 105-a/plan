@@ -720,7 +720,8 @@
       <div class="profile-intro"><span class="profile-intro-icon" id="profileUsersIcon"></span><span><strong>チームで使う名前</strong><span>予定の担当者選択とメンバー一覧に、この名前が表示されます。</span></span></div>
       <div class="field"><label for="profileDisplayName">アカウント名 *</label><input id="profileDisplayName" type="text" maxlength="30" autocomplete="nickname" placeholder="例：佐藤" required><span class="field-help">1〜30文字。同じ名前は重複して登録できません。</span></div>
       <p class="profile-error" id="profileError" role="alert"></p>
-      <div class="dialog-actions"><span class="field-help">この端末に登録情報を記憶します。</span><div class="dialog-actions-right"><button class="button" id="profileCancelButton" type="button" data-close="profileDialog">キャンセル</button><button class="button primary" type="submit">この名前で登録</button></div></div>
+      <span class="field-help">この端末に登録情報を記憶します。表示名を削除しても、過去の予定や進捗は残ります。</span>
+      <div class="dialog-actions"><button class="button danger" id="deleteProfileButton" type="button" hidden>このアカウント名を削除</button><div class="dialog-actions-right"><button class="button" id="profileCancelButton" type="button" data-close="profileDialog">キャンセル</button><button class="button primary" type="submit">この名前で登録</button></div></div>
     </form>
   </dialog>
 
@@ -892,6 +893,10 @@
       try { localStorage.setItem(MEMBER_ID_STORAGE, id); } catch { /* ブラウザが保存を制限している場合は今回のセッションだけで利用 */ }
     }
 
+    function forgetMemberId() {
+      try { localStorage.removeItem(MEMBER_ID_STORAGE); } catch { /* 保存が制限されている場合は何もしない */ }
+    }
+
     function currentMember() {
       return teamMembers.find(member => member.id === currentMemberId) || null;
     }
@@ -952,10 +957,44 @@
       $('profileError').textContent = '';
       $('profileCloseButton').hidden = required;
       $('profileCancelButton').hidden = required;
+      $('deleteProfileButton').hidden = required || !mine;
       const submit = $('profileForm').querySelector('button[type="submit"]');
       submit.textContent = required ? 'この名前ではじめる' : '表示名を保存';
       if (!$('profileDialog').open) $('profileDialog').showModal();
       requestAnimationFrame(() => $('profileDisplayName').focus());
+    }
+
+    async function deleteCurrentMember() {
+      const mine = currentMember();
+      if (!mine) return;
+      const confirmed = confirm(`「${mine.displayName}」のアカウント名を削除しますか？\n\nメンバー一覧から名前が消え、再び表示名の登録が必要になります。\n過去の予定と進捗は削除されません。`);
+      if (!confirmed) return;
+      const button = $('deleteProfileButton');
+      button.disabled = true;
+      button.textContent = '削除しています…';
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .delete()
+          .eq('id', currentMemberId)
+          .select('id');
+        if (error) throw error;
+        if (!data?.length) throw new Error('削除対象のアカウント名が見つかりませんでした');
+        forgetMemberId();
+        teamMembers = teamMembers.filter(member => member.id !== currentMemberId);
+        currentMemberId = uid();
+        renderMemberUi();
+        profileRequired = false;
+        $('profileDialog').close();
+        openProfileEditor(true);
+        toast('アカウント名を削除しました');
+      } catch (error) {
+        console.error(error);
+        $('profileError').textContent = `アカウント名を削除できませんでした。${error?.message || ''}`;
+      } finally {
+        button.disabled = false;
+        button.textContent = 'このアカウント名を削除';
+      }
     }
 
     async function loadEventsFromCloud({ quiet = false } = {}) {
@@ -1376,6 +1415,7 @@
     $('profileButton').addEventListener('click', () => openProfileEditor(!currentMember()));
     $('memberSummaryButton').addEventListener('click', () => { renderMembersList(); $('membersDialog').showModal(); });
     $('editProfileButton').addEventListener('click', () => { $('membersDialog').close(); openProfileEditor(!currentMember()); });
+    $('deleteProfileButton').addEventListener('click', deleteCurrentMember);
     $('logoutButton').addEventListener('click', async () => {
       await supabase.auth.signOut();
       await lockCalendar();
