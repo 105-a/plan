@@ -98,7 +98,7 @@
     .login-screen::after { right: -115px; bottom: -120px; transform: rotate(162deg); background-color: rgba(179,151,119,.22); }
     .login-card {
       position: relative;
-      width: min(470px, 100%);
+      width: min(520px, 100%);
       padding: 40px;
       border: 1px solid var(--line);
       border-radius: 30px;
@@ -134,7 +134,7 @@
     .login-kicker { color: var(--accent-dark); font-size: 11px; font-weight: 700; letter-spacing: .2em; margin-bottom: 10px; }
     .login-title { margin: 0; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: 34px; font-weight: 500; letter-spacing: .08em; }
     .login-copy { margin: 13px 0 26px; color: var(--muted); font-size: 13px; line-height: 1.8; }
-    .password-wrap { position: relative; }
+    .password-wrap { position: relative; display: block; }
     .password-wrap > .icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--accent-dark); }
     .password-wrap input {
       width: 100%;
@@ -151,6 +151,35 @@
     .login-error { min-height: 21px; margin: 10px 2px 0; color: #aa5555; font-size: 12px; line-height: 1.6; }
     .login-note { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 24px; color: var(--muted); font-size: 10px; }
     .login-note .icon { width: 15px; height: 15px; color: var(--green); }
+    .login-panel { position: relative; z-index: 1; }
+    .login-field { display: grid; gap: 7px; margin-top: 12px; }
+    .login-field > span { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .login-field input {
+      width: 100%;
+      height: 54px;
+      padding: 0 15px;
+      border: 1px solid var(--line-strong);
+      border-radius: 15px;
+      color: var(--ink);
+      background: rgba(255,255,255,.78);
+    }
+    .login-field .password-wrap input { padding-right: 48px; padding-left: 47px; }
+    .invite-code-input {
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .35em;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 2px 0 20px; padding: 5px; border-radius: 14px; background: rgba(126,103,83,.09); }
+    .auth-tab { min-height: 42px; border: 0; border-radius: 10px; color: var(--muted); background: transparent; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .auth-tab.active { color: var(--accent-dark); background: rgba(255,255,255,.92); box-shadow: 0 5px 16px rgba(74,54,39,.08); }
+    .login-back { width: 100%; margin-top: 8px; border: 0; color: var(--muted); background: transparent; cursor: pointer; font-size: 11px; }
+    .login-warning { margin: 13px 2px 0; padding: 10px 12px; border-radius: 11px; color: #796554; background: rgba(244,235,222,.76); font-size: 10px; line-height: 1.65; }
+    .invite-share-card { display: grid; justify-items: center; gap: 10px; padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: rgba(246,241,234,.68); text-align: center; }
+    .invite-code-display { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: clamp(34px, 8vw, 48px); font-weight: 800; letter-spacing: .18em; color: var(--accent-dark); }
+    .invite-code-expiry { color: var(--muted); font-size: 11px; }
+    .invite-actions { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
 
     .app { width: min(1500px, calc(100% - 40px)); margin: 0 auto; padding: 20px 0 38px; position: relative; }
     .topbar {
@@ -550,24 +579,51 @@
   </svg>
 
   <section class="login-screen" id="loginScreen" aria-labelledby="loginTitle">
-    <form class="login-card" id="loginForm">
+    <div class="login-card">
       <div class="login-brand">
         <span class="login-mark" id="loginBrandIcon" aria-hidden="true"></span>
         <span class="login-brand-name">YORI Calendar</span>
       </div>
-      <div class="login-kicker">MEMBERS ONLY</div>
-      <h1 class="login-title" id="loginTitle">おかえりなさい</h1>
-      <p class="login-copy">チームの共有カレンダーを開くため、パスワードを入力してください。</p>
-      <label class="password-wrap">
-        <span class="sr-only">パスワード</span>
-        <span class="icon" id="loginLockIcon" aria-hidden="true"></span>
-        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="パスワード" required>
-        <button class="password-toggle" id="passwordToggle" type="button" aria-label="パスワードを表示">表示</button>
-      </label>
-      <button class="button primary login-submit" id="loginButton" type="submit">カレンダーを開く</button>
-      <p class="login-error" id="loginError" role="alert"></p>
-      <div class="login-note"><span class="icon" id="loginCloudIcon"></span><span>予定はSupabaseで暗号化通信・リアルタイム同期されます</span></div>
-    </form>
+      <form class="login-panel" id="inviteForm">
+        <div class="login-kicker">INVITATION</div>
+        <h1 class="login-title" id="loginTitle">招待コードを入力</h1>
+        <p class="login-copy">メンバーから共有された5文字の招待コードを入力してください。コードは毎週更新されます。</p>
+        <label class="login-field">
+          <span>招待コード</span>
+          <input class="invite-code-input" id="inviteCode" type="text" maxlength="5" inputmode="text" autocomplete="one-time-code" placeholder="A2B3C" required>
+        </label>
+        <button class="button primary login-submit" id="inviteButton" type="submit">次へ進む</button>
+        <p class="login-error" id="inviteError" role="alert"></p>
+        <div class="login-note"><span class="icon" id="loginCloudIcon"></span><span>予定はSupabaseで暗号化通信・リアルタイム同期されます</span></div>
+      </form>
+
+      <section class="login-panel" id="accountPanel" hidden>
+        <div class="login-kicker">MEMBER ACCOUNT</div>
+        <h1 class="login-title">アカウントを選択</h1>
+        <p class="login-copy">初めて使う方は新規作成、登録済みの方はログインを選んでください。</p>
+        <div class="auth-tabs" role="tablist" aria-label="アカウント操作">
+          <button class="auth-tab active" id="registerTab" type="button" role="tab" aria-selected="true">新規作成</button>
+          <button class="auth-tab" id="memberLoginTab" type="button" role="tab" aria-selected="false">ログイン</button>
+        </div>
+
+        <form id="registerForm">
+          <label class="login-field"><span>名前</span><input id="registerName" type="text" maxlength="30" autocomplete="username" placeholder="例：佐藤" required></label>
+          <label class="login-field"><span>パスワード（8文字以上）</span><span class="password-wrap"><span class="icon" id="registerLockIcon"></span><input id="registerPassword" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="パスワード" required><button class="password-toggle" type="button" data-password-toggle="registerPassword" aria-label="パスワードを表示">表示</button></span></label>
+          <label class="login-field"><span>パスワード確認</span><span class="password-wrap"><span class="icon" id="confirmLockIcon"></span><input id="registerPasswordConfirm" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="もう一度入力" required><button class="password-toggle" type="button" data-password-toggle="registerPasswordConfirm" aria-label="パスワードを表示">表示</button></span></label>
+          <p class="login-warning">メールを使わないため、パスワードを忘れた場合は自動で再発行できません。忘れないものを設定してください。</p>
+          <button class="button primary login-submit" id="registerButton" type="submit">アカウントを作成</button>
+          <p class="login-error" id="registerError" role="alert"></p>
+        </form>
+
+        <form id="memberLoginForm" hidden>
+          <label class="login-field"><span>名前</span><input id="memberLoginName" type="text" maxlength="30" autocomplete="username" placeholder="登録した名前" required></label>
+          <label class="login-field"><span>パスワード</span><span class="password-wrap"><span class="icon" id="memberLoginLockIcon"></span><input id="memberLoginPassword" type="password" minlength="8" maxlength="72" autocomplete="current-password" placeholder="パスワード" required><button class="password-toggle" type="button" data-password-toggle="memberLoginPassword" aria-label="パスワードを表示">表示</button></span></label>
+          <button class="button primary login-submit" id="memberLoginButton" type="submit">ログインして開く</button>
+          <p class="login-error" id="memberLoginError" role="alert"></p>
+        </form>
+        <button class="login-back" id="backToInvite" type="button">← 招待コードの入力へ戻る</button>
+      </section>
+    </div>
   </section>
 
   <main class="app" id="calendarApp" hidden>
@@ -579,7 +635,7 @@
       <div class="top-actions" aria-label="データ操作">
         <button class="button" id="exportButton" type="button"><span class="icon" id="exportIcon"></span><span class="label">書き出す</span></button>
         <button class="button" id="importButton" type="button"><span class="icon" id="importIcon"></span><span class="label">読み込む</span></button>
-        <button class="button primary" id="shareButton" type="button"><span class="icon" id="shareIcon"></span><span class="label">共有リンク</span></button>
+        <button class="button primary" id="shareButton" type="button"><span class="icon" id="shareIcon"></span><span class="label">招待する</span></button>
         <button class="button profile-button" id="profileButton" type="button" aria-label="表示名を設定"><span class="profile-avatar" id="profileAvatar">?</span><span class="label profile-name" id="profileName">表示名設定</span></button>
         <button class="button" id="logoutButton" type="button"><span class="icon" id="logoutIcon"></span><span class="label">ログアウト</span></button>
         <input class="sr-only" id="importFile" type="file" accept="application/json,.json">
@@ -717,12 +773,28 @@
         <div><div class="dialog-kicker">YOUR PROFILE</div><h2 class="dialog-title" id="profileDialogTitle">表示名を決める</h2></div>
         <button class="close-button" id="profileCloseButton" type="button" data-close="profileDialog" aria-label="閉じる"><span class="icon" id="profileCloseIcon"></span></button>
       </div>
-      <div class="profile-intro"><span class="profile-intro-icon" id="profileUsersIcon"></span><span><strong>チームで使う名前</strong><span>予定の担当者選択とメンバー一覧に、この名前が表示されます。</span></span></div>
+      <div class="profile-intro"><span class="profile-intro-icon" id="profileUsersIcon"></span><span><strong>チームで使う名前</strong><span>名前を変更すると、次回から新しい名前でログインします。</span></span></div>
       <div class="field"><label for="profileDisplayName">アカウント名 *</label><input id="profileDisplayName" type="text" maxlength="30" autocomplete="nickname" placeholder="例：佐藤" required><span class="field-help">1〜30文字。同じ名前は重複して登録できません。</span></div>
       <p class="profile-error" id="profileError" role="alert"></p>
-      <span class="field-help">この端末に登録情報を記憶します。表示名を削除しても、過去の予定や進捗は残ります。</span>
-      <div class="dialog-actions"><button class="button danger" id="deleteProfileButton" type="button" hidden>このアカウント名を削除</button><div class="dialog-actions-right"><button class="button" id="profileCancelButton" type="button" data-close="profileDialog">キャンセル</button><button class="button primary" type="submit">この名前で登録</button></div></div>
+      <span class="field-help">アカウントを削除しても、共有済みの予定や進捗は残ります。</span>
+      <div class="dialog-actions"><button class="button danger" id="deleteProfileButton" type="button">アカウントを削除</button><div class="dialog-actions-right"><button class="button" id="profileCancelButton" type="button" data-close="profileDialog">キャンセル</button><button class="button primary" type="submit">名前を保存</button></div></div>
     </form>
+  </dialog>
+
+  <dialog id="inviteDialog" aria-labelledby="inviteDialogTitle">
+    <div class="dialog-card">
+      <div class="dialog-head">
+        <div><div class="dialog-kicker">INVITE MEMBERS</div><h2 class="dialog-title" id="inviteDialogTitle">メンバーを招待</h2></div>
+        <button class="close-button" type="button" data-close="inviteDialog" aria-label="閉じる"><span class="icon" id="inviteCloseIcon"></span></button>
+      </div>
+      <div class="invite-share-card">
+        <span class="field-help">現在の招待コード</span>
+        <strong class="invite-code-display" id="currentInviteCode">-----</strong>
+        <span class="invite-code-expiry" id="currentInviteExpiry">確認中…</span>
+      </div>
+      <p class="field-help">このコードとサイトのURLを新しいメンバーに共有してください。招待コードは毎週月曜日の0時に更新されます。</p>
+      <div class="invite-actions"><button class="button" id="copyInviteCodeButton" type="button">コードをコピー</button><button class="button primary" id="copyInviteLinkButton" type="button">リンクをコピー</button></div>
+    </div>
   </dialog>
 
   <dialog id="membersDialog" aria-labelledby="membersDialogTitle">
@@ -777,8 +849,6 @@
 
     const SUPABASE_URL = 'https://cefxqauiezsqzbaluupk.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_HATCfyLEFds4vtIb_s4k3Q_YWKL8L4O';
-    const TEAM_EMAIL = 'yori-calendar@example.com';
-    const MEMBER_ID_STORAGE = 'yori-calendar-member-id-v1';
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
     });
@@ -804,7 +874,7 @@
     let membersRealtimeRefreshTimer = null;
     let teamMembers = [];
     let currentMemberId = null;
-    let profileRequired = false;
+    let verifiedInviteCode = '';
     let events = [];
 
     function normalizeTasks(source) {
@@ -882,21 +952,6 @@
       if (state !== 'online') badge.classList.add(state);
     }
 
-    function readMemberId() {
-      try {
-        const stored = localStorage.getItem(MEMBER_ID_STORAGE);
-        return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(stored || '') ? stored : null;
-      } catch { return null; }
-    }
-
-    function rememberMemberId(id) {
-      try { localStorage.setItem(MEMBER_ID_STORAGE, id); } catch { /* ブラウザが保存を制限している場合は今回のセッションだけで利用 */ }
-    }
-
-    function forgetMemberId() {
-      try { localStorage.removeItem(MEMBER_ID_STORAGE); } catch { /* 保存が制限されている場合は何もしない */ }
-    }
-
     function currentMember() {
       return teamMembers.find(member => member.id === currentMemberId) || null;
     }
@@ -917,7 +972,7 @@
 
     function renderMembersList() {
       $('membersList').innerHTML = teamMembers.length
-        ? teamMembers.map(member => `<div class="member-row"><span class="member-avatar">${escapeHtml(memberInitial(member.displayName))}</span><span><span class="member-name">${escapeHtml(member.displayName)}</span><span class="member-meta">共有カレンダーの登録メンバー</span></span>${member.id === currentMemberId ? '<span class="current-member-badge">この端末</span>' : ''}</div>`).join('')
+        ? teamMembers.map(member => `<div class="member-row"><span class="member-avatar">${escapeHtml(memberInitial(member.displayName))}</span><span><span class="member-name">${escapeHtml(member.displayName)}</span><span class="member-meta">共有カレンダーの登録メンバー</span></span>${member.id === currentMemberId ? '<span class="current-member-badge">あなた</span>' : ''}</div>`).join('')
         : '<div class="members-empty">登録メンバーはまだいません。</div>';
     }
 
@@ -949,17 +1004,14 @@
         .subscribe();
     }
 
-    function openProfileEditor(required = false) {
-      profileRequired = required;
+    function openProfileEditor() {
       const mine = currentMember();
-      $('profileDialogTitle').textContent = required ? 'はじめに表示名を決める' : '表示名を変更';
+      if (!mine) return;
+      $('profileDialogTitle').textContent = 'アカウント名を変更';
       $('profileDisplayName').value = mine?.displayName || '';
       $('profileError').textContent = '';
-      $('profileCloseButton').hidden = required;
-      $('profileCancelButton').hidden = required;
-      $('deleteProfileButton').hidden = required || !mine;
       const submit = $('profileForm').querySelector('button[type="submit"]');
-      submit.textContent = required ? 'この名前ではじめる' : '表示名を保存';
+      submit.textContent = '名前を保存';
       if (!$('profileDialog').open) $('profileDialog').showModal();
       requestAnimationFrame(() => $('profileDisplayName').focus());
     }
@@ -967,33 +1019,23 @@
     async function deleteCurrentMember() {
       const mine = currentMember();
       if (!mine) return;
-      const confirmed = confirm(`「${mine.displayName}」のアカウント名を削除しますか？\n\nメンバー一覧から名前が消え、再び表示名の登録が必要になります。\n過去の予定と進捗は削除されません。`);
+      const confirmed = confirm(`「${mine.displayName}」のアカウントを完全に削除しますか？\n\nこの名前とパスワードではログインできなくなります。\n過去の予定と進捗は削除されません。`);
       if (!confirmed) return;
       const button = $('deleteProfileButton');
       button.disabled = true;
       button.textContent = '削除しています…';
       try {
-        const { data, error } = await supabase
-          .from('team_members')
-          .delete()
-          .eq('id', currentMemberId)
-          .select('id');
-        if (error) throw error;
-        if (!data?.length) throw new Error('削除対象のアカウント名が見つかりませんでした');
-        forgetMemberId();
-        teamMembers = teamMembers.filter(member => member.id !== currentMemberId);
-        currentMemberId = uid();
-        renderMemberUi();
-        profileRequired = false;
+        await invokeMemberAuth('deleteAccount');
         $('profileDialog').close();
-        openProfileEditor(true);
-        toast('アカウント名を削除しました');
+        await supabase.auth.signOut({ scope: 'local' });
+        await lockCalendar();
+        toast('アカウントを削除しました');
       } catch (error) {
         console.error(error);
-        $('profileError').textContent = `アカウント名を削除できませんでした。${error?.message || ''}`;
+        $('profileError').textContent = `アカウントを削除できませんでした。${error?.message || ''}`;
       } finally {
         button.disabled = false;
-        button.textContent = 'このアカウント名を削除';
+        button.textContent = 'アカウントを削除';
       }
     }
 
@@ -1030,24 +1072,68 @@
         });
     }
 
-    async function deriveAuthPassword(input) {
-      const bytes = new TextEncoder().encode(`YORI-CALENDAR|${input}`);
-      const digest = await crypto.subtle.digest('SHA-256', bytes);
-      return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+    async function invokeMemberAuth(action, payload = {}) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers = { 'Content-Type': 'application/json', apikey: SUPABASE_KEY };
+      if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/member-auth`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ action, ...payload })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw Object.assign(new Error(data.error || '処理できませんでした。'), { status: response.status });
+      return data;
+    }
+
+    function selectAccountMode(mode) {
+      const registering = mode === 'register';
+      $('registerForm').hidden = !registering;
+      $('memberLoginForm').hidden = registering;
+      $('registerTab').classList.toggle('active', registering);
+      $('memberLoginTab').classList.toggle('active', !registering);
+      $('registerTab').setAttribute('aria-selected', registering ? 'true' : 'false');
+      $('memberLoginTab').setAttribute('aria-selected', registering ? 'false' : 'true');
+      const target = registering ? $('registerName') : $('memberLoginName');
+      requestAnimationFrame(() => target.focus());
+    }
+
+    function showInviteStep() {
+      verifiedInviteCode = '';
+      $('inviteForm').hidden = false;
+      $('accountPanel').hidden = true;
+      $('inviteCode').value = '';
+      $('inviteError').textContent = '';
+      requestAnimationFrame(() => $('inviteCode').focus());
+    }
+
+    function showAccountStep(code) {
+      verifiedInviteCode = code;
+      $('inviteForm').hidden = true;
+      $('accountPanel').hidden = false;
+      $('registerError').textContent = '';
+      $('memberLoginError').textContent = '';
+      selectAccountMode('register');
+    }
+
+    async function establishSession(session) {
+      const { error } = await supabase.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token
+      });
+      if (error) throw error;
+      await unlockCalendar();
     }
 
     async function unlockCalendar() {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) throw error || new Error('ログイン情報を確認できません。');
+      currentMemberId = user.id;
+      await Promise.all([loadEventsFromCloud(), loadMembersFromCloud()]);
+      if (!currentMember()) throw new Error('このアカウントは利用できません。');
+      await Promise.all([subscribeRealtime(), subscribeMembersRealtime()]);
       $('loginScreen').hidden = true;
       $('calendarApp').hidden = false;
-      try {
-        currentMemberId = readMemberId() || uid();
-        await Promise.all([loadEventsFromCloud(), loadMembersFromCloud()]);
-        await Promise.all([subscribeRealtime(), subscribeMembersRealtime()]);
-        if (!currentMember()) openProfileEditor(true);
-      } catch (error) {
-        console.error(error);
-        toast('Supabaseへ接続できませんでした');
-      }
     }
 
     async function lockCalendar() {
@@ -1057,12 +1143,13 @@
       membersRealtimeChannel = null;
       events = [];
       teamMembers = [];
-      profileRequired = false;
-      ['eventDialog', 'detailDialog', 'progressDialog', 'profileDialog', 'membersDialog'].forEach(id => { if ($(id)?.open) $(id).close(); });
+      currentMemberId = null;
+      ['eventDialog', 'detailDialog', 'progressDialog', 'profileDialog', 'membersDialog', 'inviteDialog'].forEach(id => { if ($(id)?.open) $(id).close(); });
       $('calendarApp').hidden = true;
       $('loginScreen').hidden = false;
-      $('loginPassword').value = '';
-      $('loginError').textContent = '';
+      $('registerForm').reset();
+      $('memberLoginForm').reset();
+      showInviteStep();
     }
 
     async function saveEventToCloud(item, editing) {
@@ -1375,13 +1462,27 @@
       toast(`${normalized.length}件の予定を読み込みました`);
     }
 
-    async function createShareLink() {
-      const base = location.href.split('#')[0];
+    async function copyText(value, successMessage) {
       try {
-        await navigator.clipboard.writeText(base);
-        toast('共有リンクをコピーしました');
+        await navigator.clipboard.writeText(value);
+        toast(successMessage);
       } catch {
-        prompt('この共有リンクをコピーしてください', base);
+        prompt('以下をコピーしてください', value);
+      }
+    }
+
+    async function openInviteDialog() {
+      $('currentInviteCode').textContent = '-----';
+      $('currentInviteExpiry').textContent = '確認中…';
+      if (!$('inviteDialog').open) $('inviteDialog').showModal();
+      try {
+        const data = await invokeMemberAuth('currentInvite');
+        $('currentInviteCode').textContent = data.code;
+        const expires = new Date(data.expiresAt);
+        $('currentInviteExpiry').textContent = `${new Intl.DateTimeFormat('ja-JP', { month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' }).format(expires)}まで有効`;
+      } catch (error) {
+        console.error(error);
+        $('currentInviteExpiry').textContent = '招待コードを取得できませんでした';
       }
     }
 
@@ -1389,14 +1490,15 @@
       const target = $(id);
       target.innerHTML = target.classList.contains('icon') ? ICONS[name] : icon(name);
     }
-    setIcon('loginBrandIcon', 'calendar'); setIcon('loginLockIcon', 'lock'); setIcon('loginCloudIcon', 'cloud');
+    setIcon('loginBrandIcon', 'calendar'); setIcon('loginCloudIcon', 'cloud');
+    setIcon('registerLockIcon', 'lock'); setIcon('confirmLockIcon', 'lock'); setIcon('memberLoginLockIcon', 'lock');
     setIcon('brandIcon', 'calendar'); setIcon('exportIcon', 'download'); setIcon('importIcon', 'upload'); setIcon('shareIcon', 'share');
     setIcon('logoutIcon', 'logout');
     setIcon('plusIcon', 'plus'); setIcon('searchIcon', 'search'); setIcon('infoIcon', 'info'); setIcon('monthCountIcon', 'calendar');
     setIcon('memberCountIcon', 'users'); setIcon('nextEventIcon', 'clock'); setIcon('overallProgressIcon', 'progress');
     setIcon('eventTasksIcon', 'check'); setIcon('progressTasksIcon', 'check');
     setIcon('formCloseIcon', 'close'); setIcon('detailCloseIcon', 'close'); setIcon('progressCloseIcon', 'close');
-    setIcon('profileCloseIcon', 'close'); setIcon('membersCloseIcon', 'close'); setIcon('profileUsersIcon', 'users');
+    setIcon('profileCloseIcon', 'close'); setIcon('membersCloseIcon', 'close'); setIcon('inviteCloseIcon', 'close'); setIcon('profileUsersIcon', 'users');
     $('eventCategory').innerHTML = CATEGORIES.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
 
     $('previousMonth').addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1); renderAll(); });
@@ -1411,78 +1513,119 @@
     $('searchInput').addEventListener('input', event => { searchQuery = event.target.value.trim(); renderAll(); });
     $('exportButton').addEventListener('click', exportData);
     $('importButton').addEventListener('click', () => $('importFile').click());
-    $('shareButton').addEventListener('click', createShareLink);
-    $('profileButton').addEventListener('click', () => openProfileEditor(!currentMember()));
+    $('shareButton').addEventListener('click', openInviteDialog);
+    $('profileButton').addEventListener('click', openProfileEditor);
     $('memberSummaryButton').addEventListener('click', () => { renderMembersList(); $('membersDialog').showModal(); });
-    $('editProfileButton').addEventListener('click', () => { $('membersDialog').close(); openProfileEditor(!currentMember()); });
+    $('editProfileButton').addEventListener('click', () => { $('membersDialog').close(); openProfileEditor(); });
     $('deleteProfileButton').addEventListener('click', deleteCurrentMember);
     $('logoutButton').addEventListener('click', async () => {
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
       await lockCalendar();
     });
-    $('passwordToggle').addEventListener('click', () => {
-      const input = $('loginPassword');
+
+    document.querySelectorAll('[data-password-toggle]').forEach(button => button.addEventListener('click', () => {
+      const input = $(button.dataset.passwordToggle);
       const showing = input.type === 'text';
       input.type = showing ? 'password' : 'text';
-      $('passwordToggle').textContent = showing ? '表示' : '隠す';
-      $('passwordToggle').setAttribute('aria-label', showing ? 'パスワードを表示' : 'パスワードを隠す');
+      button.textContent = showing ? '表示' : '隠す';
+      button.setAttribute('aria-label', showing ? 'パスワードを表示' : 'パスワードを隠す');
+    }));
+
+    $('inviteCode').addEventListener('input', event => {
+      event.target.value = event.target.value.toUpperCase().replace(/[^A-Z2-9]/g, '').slice(0, 5);
     });
-    $('loginForm').addEventListener('submit', async event => {
+    $('inviteForm').addEventListener('submit', async event => {
       event.preventDefault();
-      const button = $('loginButton');
-      const password = $('loginPassword').value;
-      $('loginError').textContent = '';
+      const button = $('inviteButton');
+      const inviteCode = $('inviteCode').value.trim().toUpperCase();
+      $('inviteError').textContent = '';
       button.disabled = true;
       button.textContent = '確認しています…';
       try {
-        const derivedPassword = await deriveAuthPassword(password);
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: TEAM_EMAIL,
-          password: derivedPassword
-        });
-        if (error) throw error;
-        if (data.user?.email !== TEAM_EMAIL) throw new Error('許可されていないアカウントです');
-        await unlockCalendar();
+        await invokeMemberAuth('verifyInvite', { inviteCode });
+        showAccountStep(inviteCode);
       } catch (error) {
         console.error(error);
-        $('loginError').textContent = 'パスワードが違うか、共有アカウントの初期設定が完了していません。';
-        $('loginPassword').select();
+        $('inviteError').textContent = error.message || '招待コードを確認できませんでした。';
+        $('inviteCode').select();
       } finally {
         button.disabled = false;
-        button.textContent = 'カレンダーを開く';
+        button.textContent = '次へ進む';
       }
     });
+
+    $('registerTab').addEventListener('click', () => selectAccountMode('register'));
+    $('memberLoginTab').addEventListener('click', () => selectAccountMode('login'));
+    $('backToInvite').addEventListener('click', showInviteStep);
+
+    $('registerForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const displayName = $('registerName').value.trim();
+      const password = $('registerPassword').value;
+      const confirmPassword = $('registerPasswordConfirm').value;
+      const button = $('registerButton');
+      $('registerError').textContent = '';
+      if (password !== confirmPassword) {
+        $('registerError').textContent = '確認用パスワードが一致しません。';
+        return;
+      }
+      button.disabled = true;
+      button.textContent = '作成しています…';
+      try {
+        const data = await invokeMemberAuth('register', { displayName, password, inviteCode: verifiedInviteCode });
+        await establishSession(data.session);
+        toast('アカウントを作成しました');
+      } catch (error) {
+        console.error(error);
+        $('registerError').textContent = error.message || 'アカウントを作成できませんでした。';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'アカウントを作成';
+      }
+    });
+
+    $('memberLoginForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const displayName = $('memberLoginName').value.trim();
+      const password = $('memberLoginPassword').value;
+      const button = $('memberLoginButton');
+      $('memberLoginError').textContent = '';
+      button.disabled = true;
+      button.textContent = 'ログインしています…';
+      try {
+        const data = await invokeMemberAuth('login', { displayName, password });
+        await establishSession(data.session);
+        toast('ログインしました');
+      } catch (error) {
+        console.error(error);
+        $('memberLoginError').textContent = error.message || '名前またはパスワードが違います。';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'ログインして開く';
+      }
+    });
+
+    $('copyInviteCodeButton').addEventListener('click', () => copyText($('currentInviteCode').textContent, '招待コードをコピーしました'));
+    $('copyInviteLinkButton').addEventListener('click', () => copyText(location.href.split('#')[0], '招待リンクをコピーしました'));
     $('profileForm').addEventListener('submit', async event => {
       event.preventDefault();
       const displayName = $('profileDisplayName').value.trim();
       const submitButton = $('profileForm').querySelector('button[type="submit"]');
       $('profileError').textContent = '';
-      if (!displayName) { $('profileError').textContent = '表示名を入力してください。'; return; }
+      if (!displayName) { $('profileError').textContent = 'アカウント名を入力してください。'; return; }
       submitButton.disabled = true;
       submitButton.textContent = '保存しています…';
       try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) throw userError || new Error('ログイン情報を確認できません');
-        const { error } = await supabase.from('team_members').upsert({
-          id: currentMemberId,
-          display_name: displayName,
-          created_by: user.id,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
-        if (error) throw error;
-        rememberMemberId(currentMemberId);
+        await invokeMemberAuth('rename', { displayName });
         await loadMembersFromCloud();
-        profileRequired = false;
         $('profileDialog').close();
-        toast('表示名を登録しました');
+        toast('アカウント名を変更しました');
       } catch (error) {
         console.error(error);
-        $('profileError').textContent = error?.code === '23505'
-          ? 'その表示名はすでに使われています。別の名前を入力してください。'
-          : `表示名を保存できませんでした。${error?.message || ''}`;
+        $('profileError').textContent = error.message || 'アカウント名を変更できませんでした。';
       } finally {
         submitButton.disabled = false;
-        submitButton.textContent = profileRequired ? 'この名前ではじめる' : '表示名を保存';
+        submitButton.textContent = '名前を保存';
       }
     });
     $('importFile').addEventListener('change', async event => {
@@ -1566,10 +1709,8 @@
     $('deleteEventButton').addEventListener('click', () => deleteEvent(selectedEventId));
     $('deleteFromForm').addEventListener('click', () => deleteEvent($('eventId').value));
     document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => $(button.dataset.close).close()));
-    $('profileDialog').addEventListener('cancel', event => { if (profileRequired) event.preventDefault(); });
     document.querySelectorAll('dialog').forEach(dialog => dialog.addEventListener('click', event => {
       const box = dialog.querySelector('.dialog-card').getBoundingClientRect();
-      if (dialog.id === 'profileDialog' && profileRequired) return;
       if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) dialog.close();
     }));
     supabase.auth.onAuthStateChange((event, session) => {
@@ -1578,8 +1719,17 @@
 
     async function initializeAuth() {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.email === TEAM_EMAIL) await unlockCalendar();
-      else await lockCalendar();
+      if (!session) {
+        await lockCalendar();
+        return;
+      }
+      try {
+        await unlockCalendar();
+      } catch (error) {
+        console.error(error);
+        await supabase.auth.signOut({ scope: 'local' });
+        await lockCalendar();
+      }
     }
 
     initializeAuth();
