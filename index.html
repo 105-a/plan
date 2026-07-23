@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f0e7">
+  <title>YORI Calendar｜チーム予定管理</title>
+  <style>
+    :root {
+      --bg: #f4ede4;
+      --paper: #fffdf9;
+      --paper-glass: rgba(255, 253, 249, .82);
+      --ink: #352922;
+      --muted: #827367;
+      --line: rgba(91, 69, 52, .14);
+      --line-strong: rgba(91, 69, 52, .25);
+      --accent: #b88259;
+      --accent-dark: #875d3f;
+      --green: #7f9477;
+      --shadow: 0 22px 60px rgba(74, 54, 39, .10);
+      --soft-shadow: 0 10px 28px rgba(74, 54, 39, .075);
+      --meeting: #b68567;
+      --project: #779582;
+      --outing: #7599af;
+      --deadline: #c77572;
+      --social: #c89b4e;
+      --other: #9a88a2;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+      background:
+        radial-gradient(circle at 8% 0%, rgba(255,255,255,.95), transparent 30%),
+        radial-gradient(circle at 91% 9%, rgba(216,188,151,.25), transparent 30%),
+        linear-gradient(135deg, #fffaf4 0%, #f5ece1 46%, #eadccc 100%);
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .45;
+      background-image:
+        linear-gradient(rgba(93,69,49,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(93,69,49,.028) 1px, transparent 1px);
+      background-size: 30px 30px;
+      mask-image: linear-gradient(to bottom, black, transparent 68%);
+    }
+    button, input, select, textarea { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 3px solid rgba(184, 130, 89, .26);
+      outline-offset: 2px;
+    }
+    [hidden] { display: none !important; }
+    .icon { width: 20px; height: 20px; display: inline-block; flex: 0 0 auto; }
+    .icon svg { width: 100%; height: 100%; display: block; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+
+    .leaf-art { position: fixed; z-index: -1; pointer-events: none; color: #929b80; opacity: .35; }
+    .leaf-art.left { width: 280px; left: -86px; top: 68px; transform: rotate(-11deg); }
+    .leaf-art.right { width: 240px; right: -64px; bottom: 16px; transform: rotate(13deg); color: #b29a7e; }
+
+    .login-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 14% 10%, rgba(255,255,255,.96), transparent 32%),
+        radial-gradient(circle at 88% 16%, rgba(216,188,151,.29), transparent 31%),
+        linear-gradient(135deg, #fffaf4 0%, #f5ece1 48%, #eadccc 100%);
+    }
+    .login-screen::before,
+    .login-screen::after {
+      content: "";
+      position: absolute;
+      width: 320px;
+      height: 520px;
+      border-radius: 50%;
+      opacity: .26;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse at 44% 16%, #839177 0 15%, transparent 16%),
+        radial-gradient(ellipse at 63% 35%, #a1a27f 0 16%, transparent 17%),
+        radial-gradient(ellipse at 36% 55%, #8c987d 0 15%, transparent 16%);
+      transform: rotate(-18deg);
+    }
+    .login-screen::before { left: -110px; top: -70px; }
+    .login-screen::after { right: -115px; bottom: -120px; transform: rotate(162deg); background-color: rgba(179,151,119,.22); }
+    .login-card {
+      position: relative;
+      width: min(520px, 100%);
+      padding: 40px;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background: rgba(255,253,249,.88);
+      box-shadow: 0 32px 90px rgba(74,54,39,.16);
+      backdrop-filter: blur(20px);
+      overflow: hidden;
+    }
+    .login-card::after {
+      content: "";
+      position: absolute;
+      right: -55px;
+      top: -65px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(184,130,89,.18), transparent 68%);
+      pointer-events: none;
+    }
+    .login-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 38px; }
+    .login-mark {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 50% 50% 46% 54%;
+      color: white;
+      background: linear-gradient(145deg, #c3936e, #9b6d4c);
+      box-shadow: 0 10px 24px rgba(139,92,61,.24);
+    }
+    .login-mark .icon { width: 27px; height: 27px; }
+    .login-brand-name { font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: 20px; letter-spacing: .1em; }
+    .login-kicker { color: var(--accent-dark); font-size: 11px; font-weight: 700; letter-spacing: .2em; margin-bottom: 10px; }
+    .login-title { margin: 0; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: 34px; font-weight: 500; letter-spacing: .08em; }
+    .login-copy { margin: 13px 0 26px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+    .password-wrap { position: relative; display: block; }
+    .password-wrap > .icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--accent-dark); }
+    .password-wrap input {
+      width: 100%;
+      height: 54px;
+      padding: 0 48px 0 47px;
+      border: 1px solid var(--line-strong);
+      border-radius: 15px;
+      color: var(--ink);
+      background: rgba(255,255,255,.78);
+      letter-spacing: .14em;
+    }
+    .password-toggle { position: absolute; right: 7px; top: 7px; width: 40px; height: 40px; border: 0; border-radius: 11px; color: var(--muted); background: transparent; cursor: pointer; }
+    .login-submit { width: 100%; height: 52px; margin-top: 13px; border-radius: 15px; }
+    .login-error { min-height: 21px; margin: 10px 2px 0; color: #aa5555; font-size: 12px; line-height: 1.6; }
+    .login-note { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 24px; color: var(--muted); font-size: 10px; }
+    .login-note .icon { width: 15px; height: 15px; color: var(--green); }
+    .login-panel { position: relative; z-index: 1; }
+    .login-field { display: grid; gap: 7px; margin-top: 12px; }
+    .login-field > span { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .login-field input {
+      width: 100%;
+      height: 54px;
+      padding: 0 15px;
+      border: 1px solid var(--line-strong);
+      border-radius: 15px;
+      color: var(--ink);
+      background: rgba(255,255,255,.78);
+    }
+    .login-field .password-wrap input { padding-right: 48px; padding-left: 47px; }
+    .invite-code-input {
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .35em;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 2px 0 20px; padding: 5px; border-radius: 14px; background: rgba(126,103,83,.09); }
+    .auth-tab { min-height: 42px; border: 0; border-radius: 10px; color: var(--muted); background: transparent; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .auth-tab.active { color: var(--accent-dark); background: rgba(255,255,255,.92); box-shadow: 0 5px 16px rgba(74,54,39,.08); }
+    .login-back { width: 100%; margin-top: 8px; border: 0; color: var(--muted); background: transparent; cursor: pointer; font-size: 11px; }
+    .login-warning { margin: 13px 2px 0; padding: 10px 12px; border-radius: 11px; color: #796554; background: rgba(244,235,222,.76); font-size: 10px; line-height: 1.65; }
+    .invite-share-card { display: grid; justify-items: center; gap: 10px; padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: rgba(246,241,234,.68); text-align: center; }
+    .invite-code-display { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: clamp(34px, 8vw, 48px); font-weight: 800; letter-spacing: .18em; color: var(--accent-dark); }
+    .invite-code-expiry { color: var(--muted); font-size: 11px; }
+    .invite-actions { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+
+    .app { width: min(1500px, calc(100% - 40px)); margin: 0 auto; padding: 20px 0 38px; position: relative; }
+    .topbar {
+      position: sticky;
+      top: 14px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      min-height: 72px;
+      padding: 12px 16px 12px 22px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255, 253, 249, .78);
+      box-shadow: var(--soft-shadow);
+      backdrop-filter: blur(18px);
+    }
+    .brand { display: flex; align-items: center; gap: 13px; min-width: 190px; }
+    .brand-mark {
+      width: 42px; height: 42px; display: grid; place-items: center;
+      border-radius: 50% 50% 46% 54%; color: white;
+      background: linear-gradient(145deg, #c3936e, #9b6d4c);
+      box-shadow: 0 9px 20px rgba(139, 92, 61, .22);
+    }
+    .brand-mark .icon { width: 24px; height: 24px; }
+    .brand-name { font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: 20px; letter-spacing: .09em; white-space: nowrap; }
+    .brand-sub { color: var(--muted); font-size: 10px; letter-spacing: .17em; margin-top: 2px; }
+    .top-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+    .button {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 0 15px;
+      background: rgba(255,255,255,.72);
+      box-shadow: 0 7px 18px rgba(74,54,39,.05);
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    .button:hover { transform: translateY(-1px); background: white; box-shadow: var(--soft-shadow); }
+    .button.primary { color: white; background: var(--accent-dark); border-color: transparent; }
+    .button.primary:hover { background: #704b34; }
+    .button.danger { color: #a84d4d; border-color: rgba(168,77,77,.25); }
+    .button.icon-only { width: 44px; padding: 0; }
+    .profile-button { max-width: 190px; padding-left: 8px; }
+    .profile-avatar {
+      width: 30px; height: 30px; display: grid; place-items: center; flex: 0 0 auto;
+      border-radius: 50%; color: white; background: linear-gradient(145deg, #8da086, #687c67);
+      font-family: "Yu Mincho", serif; font-size: 13px; font-weight: 700;
+    }
+    .profile-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .share-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 14px 0 0;
+      padding: 14px 16px;
+      border: 1px solid rgba(116,145,122,.34);
+      border-radius: 16px;
+      background: rgba(244,251,244,.88);
+      box-shadow: var(--soft-shadow);
+    }
+    .share-banner.show { display: flex; }
+    .share-banner strong { display: block; margin-bottom: 4px; }
+    .share-banner small { color: #627064; }
+    .banner-actions { display: flex; gap: 8px; flex: 0 0 auto; }
+
+    .hero { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 28px; padding: 48px 26px 24px; }
+    .eyebrow { color: var(--accent-dark); font-size: 12px; font-weight: 700; letter-spacing: .22em; margin-bottom: 13px; }
+    .hero h1 { margin: 0; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-weight: 500; font-size: clamp(34px, 4.2vw, 60px); letter-spacing: .08em; line-height: 1.1; }
+    .hero-copy { margin: 13px 0 0; color: var(--muted); line-height: 1.8; font-size: 14px; }
+    .month-toolbar { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; justify-content: flex-end; }
+    .month-label {
+      min-width: 208px; height: 56px; padding: 0 20px;
+      border: 1px solid var(--line); border-radius: 16px;
+      background: var(--paper-glass); box-shadow: var(--soft-shadow); cursor: pointer;
+      font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: 22px; letter-spacing: .08em;
+    }
+    .nav-button { width: 56px; height: 56px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper-glass); box-shadow: var(--soft-shadow); cursor: pointer; font-size: 28px; }
+    .today-button { height: 56px; padding: 0 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper-glass); box-shadow: var(--soft-shadow); cursor: pointer; }
+    #monthPicker { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+
+    .category-bar {
+      display: flex; align-items: center; gap: 8px; overflow-x: auto;
+      padding: 10px; margin: 0 0 18px;
+      border: 1px solid var(--line); border-radius: 18px;
+      background: rgba(255,253,249,.62); box-shadow: var(--soft-shadow); scrollbar-width: none;
+    }
+    .category-bar::-webkit-scrollbar { display: none; }
+    .category-filter {
+      flex: 0 0 auto; min-height: 44px; display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 14px; border: 1px solid transparent; border-radius: 999px;
+      background: transparent; cursor: pointer; white-space: nowrap; font-size: 13px;
+    }
+    .category-filter .icon { color: var(--cat); }
+    .category-filter:hover { background: rgba(255,255,255,.65); }
+    .category-filter.active { background: white; border-color: color-mix(in srgb, var(--cat, var(--accent)) 38%, white); box-shadow: 0 8px 18px rgba(74,54,39,.07); }
+    .category-filter.all.active { border-color: rgba(184,130,89,.35); }
+
+    .workspace { display: grid; grid-template-columns: minmax(700px, 1fr) 380px; gap: 20px; align-items: start; }
+    .panel { border: 1px solid var(--line); border-radius: 28px; background: var(--paper-glass); box-shadow: var(--shadow); backdrop-filter: blur(16px); }
+    .calendar-panel { padding: 22px; overflow: hidden; }
+    .calendar-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+    .calendar-head-note { color: var(--muted); font-size: 13px; }
+    .legend { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12px; }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .legend i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+    .weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .weekdays div { padding: 0 5px 12px; text-align: center; color: var(--muted); font-family: "Yu Mincho", serif; font-size: 14px; letter-spacing: .12em; }
+    .weekdays div:first-child { color: #b75555; }
+    .weekdays div:last-child { color: #4f779a; }
+    .calendar-grid { border-top: 1px solid var(--line); border-left: 1px solid var(--line); border-radius: 17px; overflow: hidden; background: rgba(255,255,255,.32); }
+    .day {
+      position: relative; min-height: 130px; padding: 10px 7px 8px;
+      border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.16); text-align: left; cursor: pointer; overflow: hidden;
+      transition: background .16s ease, box-shadow .16s ease;
+    }
+    .day:hover { background: rgba(255,255,255,.74); box-shadow: inset 0 0 0 1px rgba(184,130,89,.17); }
+    .day.other { color: rgba(53,41,34,.32); background: rgba(244,238,230,.26); }
+    .day.selected { background: rgba(255,248,238,.92); box-shadow: inset 0 0 0 2px rgba(184,130,89,.34); }
+    .date-number { width: 29px; height: 29px; display: grid; place-items: center; border-radius: 50%; margin: 0 0 5px 2px; font-size: 13px; }
+    .day.today .date-number { color: white; background: var(--accent); box-shadow: 0 6px 14px rgba(184,130,89,.28); }
+    .day.sunday .date-number { color: #b75555; }
+    .day.saturday .date-number { color: #4f779a; }
+    .day.today.sunday .date-number, .day.today.saturday .date-number { color: white; }
+    .event-chip {
+      width: 100%; min-height: 25px; display: flex; align-items: center; gap: 5px;
+      margin-top: 4px; padding: 4px 7px; border: 1px solid color-mix(in srgb, var(--cat) 24%, white);
+      border-radius: 8px; background: color-mix(in srgb, var(--cat) 16%, white);
+      color: #44362e; cursor: pointer; text-align: left; font-size: 11px; line-height: 1.2;
+      overflow: hidden; box-shadow: 0 3px 10px rgba(74,54,39,.04);
+    }
+    .event-chip:hover { background: color-mix(in srgb, var(--cat) 24%, white); }
+    .event-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cat); flex: 0 0 auto; }
+    .event-chip .event-time { color: var(--muted); flex: 0 0 auto; font-size: 9px; }
+    .event-chip .event-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .more-events { margin: 5px 0 0 8px; color: var(--muted); font-size: 10px; }
+
+    .calendar-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+    .summary-card { min-height: 70px; display: flex; align-items: center; gap: 12px; padding: 12px 15px; border: 1px solid var(--line); border-radius: 15px; color: inherit; background: rgba(255,255,255,.55); text-align: left; }
+    .summary-button { width: 100%; cursor: pointer; transition: transform .18s ease, background .18s ease, box-shadow .18s ease; }
+    .summary-button:hover { transform: translateY(-1px); background: white; box-shadow: var(--soft-shadow); }
+    .summary-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; color: var(--accent-dark); background: #f3e5d7; }
+    .summary-icon.green { color: #58715b; background: #e4eee3; }
+    .summary-icon.blue { color: #587386; background: #e1ebef; }
+    .summary-card strong { display: block; font-family: "Yu Mincho", serif; font-size: 22px; font-weight: 500; }
+    .summary-card small { color: var(--muted); font-size: 11px; }
+
+    .progress-panel { margin-top: 20px; padding: 22px; }
+    .progress-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 17px; }
+    .progress-title { margin: 0; font-family: "Yu Mincho", serif; font-size: 27px; font-weight: 500; letter-spacing: .06em; }
+    .progress-copy { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .progress-overall { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; padding: 9px 13px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.58); }
+    .progress-overall .icon { color: var(--green); }
+    .progress-overall strong { font-family: "Yu Mincho", serif; font-size: 22px; font-weight: 500; }
+    .progress-overall small { display: block; color: var(--muted); font-size: 9px; }
+    .progress-board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .progress-card {
+      position: relative; min-width: 0; display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: center; gap: 14px;
+      padding: 15px; border: 1px solid var(--line); border-radius: 17px; color: inherit; background: rgba(255,255,255,.58);
+      text-align: left; cursor: pointer; box-shadow: 0 8px 22px rgba(74,54,39,.045); transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    .progress-card:hover { transform: translateY(-2px); background: white; box-shadow: var(--soft-shadow); }
+    .progress-ring {
+      --value: 0; --ring-color: var(--accent); width: 76px; height: 76px; display: grid; place-items: center; border-radius: 50%;
+      background: conic-gradient(var(--ring-color) calc(var(--value) * 1%), rgba(116,91,72,.10) 0);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.65);
+    }
+    .progress-ring::before { content: ""; grid-area: 1 / 1; width: 58px; height: 58px; border-radius: 50%; background: #fffdf9; box-shadow: 0 3px 10px rgba(74,54,39,.08); }
+    .progress-ring strong { grid-area: 1 / 1; z-index: 1; font-family: "Yu Mincho", serif; font-size: 18px; font-weight: 600; }
+    .progress-card-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 700; }
+    .progress-card-meta { margin-top: 5px; color: var(--muted); font-size: 10px; }
+    .progress-task-preview { display: grid; gap: 5px; margin-top: 9px; }
+    .progress-task-preview span { display: flex; align-items: center; gap: 6px; min-width: 0; color: #66564b; font-size: 10px; }
+    .progress-task-preview i { width: 13px; height: 13px; display: grid; place-items: center; flex: 0 0 auto; border: 1px solid var(--line-strong); border-radius: 4px; font-style: normal; }
+    .progress-task-preview span.done { color: #8d837a; text-decoration: line-through; }
+    .progress-task-preview span.done i { color: white; border-color: var(--green); background: var(--green); text-decoration: none; }
+    .progress-task-preview b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+    .progress-edit-hint { position: absolute; right: 11px; top: 10px; color: var(--muted); opacity: .7; }
+    .progress-edit-hint .icon { width: 15px; height: 15px; }
+    .progress-empty { grid-column: 1 / -1; padding: 28px; border: 1px dashed var(--line-strong); border-radius: 17px; color: var(--muted); text-align: center; background: rgba(255,255,255,.28); }
+    .progress-empty .icon { width: 30px; height: 30px; margin-bottom: 8px; color: var(--accent); }
+    .progress-empty strong { display: block; margin-bottom: 5px; color: var(--ink); }
+
+    .side-panel { padding: 20px; }
+    .side-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .side-kicker { color: var(--accent-dark); font-size: 10px; font-weight: 700; letter-spacing: .17em; margin-bottom: 6px; }
+    .side-title { margin: 0; font-family: "Yu Mincho", serif; font-weight: 500; font-size: 25px; letter-spacing: .06em; }
+    .add-button { width: 48px; height: 48px; display: grid; place-items: center; border: 0; border-radius: 50%; color: white; background: var(--accent-dark); cursor: pointer; box-shadow: 0 12px 24px rgba(109,74,49,.24); transition: transform .18s ease; }
+    .add-button:hover { transform: translateY(-2px) rotate(3deg); }
+    .add-button .icon { width: 23px; height: 23px; }
+    .search-box { position: relative; margin-bottom: 14px; }
+    .search-box .icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+    .search-box input { width: 100%; height: 46px; padding: 0 13px 0 42px; border: 1px solid var(--line); border-radius: 13px; color: var(--ink); background: rgba(255,255,255,.62); }
+    .event-list { display: grid; gap: 10px; max-height: 732px; overflow: auto; padding-right: 3px; }
+    .list-card {
+      width: 100%; display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 11px;
+      padding: 12px; border: 1px solid var(--line); border-radius: 15px;
+      background: rgba(255,255,255,.64); color: inherit; text-align: left; cursor: pointer;
+      box-shadow: 0 8px 20px rgba(74,54,39,.045); transition: transform .16s ease, background .16s ease;
+    }
+    .list-card:hover { transform: translateY(-1px); background: white; }
+    .list-date { width: 48px; height: 52px; display: grid; place-items: center; align-content: center; border-radius: 12px; color: var(--cat); background: color-mix(in srgb, var(--cat) 13%, white); }
+    .list-date strong { display: block; font-family: "Yu Mincho", serif; font-size: 19px; line-height: 1; }
+    .list-date small { margin-top: 4px; font-size: 9px; }
+    .list-title { font-size: 14px; font-weight: 700; line-height: 1.4; margin-bottom: 4px; }
+    .list-meta { color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .owner-avatar { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--cat); font-size: 11px; font-weight: 700; }
+    .mini-progress { grid-column: 2 / -1; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 9px; margin-top: -2px; }
+    .mini-progress-label { color: var(--muted); font-size: 9px; }
+    .mini-progress strong { color: var(--cat); font-family: "Yu Mincho", serif; font-size: 12px; font-weight: 700; }
+    .mini-progress-track { grid-column: 1 / -1; height: 6px; overflow: hidden; border-radius: 999px; background: rgba(91,69,52,.09); }
+    .mini-progress-fill { display: block; height: 100%; border-radius: inherit; background: var(--cat); transition: width .3s ease; }
+    .empty-state { padding: 34px 14px; border: 1px dashed var(--line-strong); border-radius: 15px; text-align: center; color: var(--muted); background: rgba(255,255,255,.35); }
+    .empty-state .icon { width: 34px; height: 34px; margin-bottom: 10px; color: #ad9c8c; }
+    .empty-state strong { display: block; margin-bottom: 6px; color: var(--ink); }
+
+    .tips {
+      display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px;
+      margin-top: 20px; padding: 17px 20px; border: 1px solid var(--line); border-radius: 20px;
+      background: rgba(255,253,249,.62); color: var(--muted); box-shadow: var(--soft-shadow); font-size: 13px; line-height: 1.7;
+    }
+    .tips > .icon { width: 28px; height: 28px; color: var(--accent); }
+    .storage-badge { padding: 6px 10px; border-radius: 999px; color: #657062; background: #eaf0e7; white-space: nowrap; font-size: 10px; }
+    .storage-badge.syncing { color: #876640; background: #f4ead7; }
+    .storage-badge.offline { color: #984f4f; background: #f5dfdf; }
+
+    dialog { border: 0; padding: 0; background: transparent; max-width: none; max-height: none; }
+    dialog::backdrop { background: rgba(53,41,34,.31); backdrop-filter: blur(7px); }
+    .dialog-card {
+      width: min(690px, calc(100vw - 24px)); max-height: min(880px, calc(100vh - 32px)); overflow: auto;
+      border: 1px solid var(--line-strong); border-radius: 24px; background: rgba(255,253,249,.98);
+      box-shadow: 0 30px 90px rgba(53,41,34,.23); padding: 24px;
+    }
+    .dialog-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 20px; }
+    .dialog-kicker { color: var(--accent-dark); font-size: 10px; font-weight: 700; letter-spacing: .18em; margin-bottom: 6px; }
+    .dialog-title { margin: 0; font-family: "Yu Mincho", serif; font-weight: 500; font-size: 28px; letter-spacing: .06em; }
+    .close-button { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: white; cursor: pointer; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .field { display: grid; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { font-size: 12px; font-weight: 700; color: #59473c; }
+    .field input, .field select, .field textarea {
+      width: 100%; min-height: 46px; border: 1px solid var(--line); border-radius: 12px;
+      padding: 10px 12px; color: var(--ink); background: rgba(255,255,255,.72);
+    }
+    .field textarea { min-height: 92px; resize: vertical; line-height: 1.6; }
+    .field-help { color: var(--muted); font-size: 10px; }
+    .task-field { grid-column: 1 / -1; padding: 15px; border: 1px solid var(--line); border-radius: 15px; background: rgba(248,244,238,.72); }
+    .task-field-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .task-field-title { display: flex; align-items: center; gap: 7px; color: #59473c; font-size: 12px; font-weight: 700; }
+    .task-field-title .icon { color: var(--green); }
+    .task-add { min-height: 34px; padding: 0 11px; border: 1px solid var(--line); border-radius: 10px; color: var(--accent-dark); background: white; cursor: pointer; font-size: 11px; }
+    .task-editor { display: grid; gap: 8px; }
+    .task-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) 34px; align-items: center; gap: 8px; }
+    .task-row input[type="checkbox"] { width: 19px; height: 19px; accent-color: var(--green); cursor: pointer; }
+    .task-row input[type="text"] { width: 100%; min-height: 40px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; color: var(--ink); background: rgba(255,255,255,.82); }
+    .task-remove { width: 34px; height: 34px; display: grid; place-items: center; border: 0; border-radius: 9px; color: #a26262; background: rgba(190,116,116,.09); cursor: pointer; }
+    .task-remove .icon { width: 16px; height: 16px; }
+    .task-empty-note { padding: 12px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); text-align: center; font-size: 10px; }
+    .progress-edit-summary { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 18px; margin-bottom: 18px; padding: 15px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.58); }
+    .progress-edit-summary .progress-ring { width: 82px; height: 82px; }
+    .progress-edit-summary .progress-ring::before { width: 62px; height: 62px; }
+    .progress-edit-summary h3 { margin: 0 0 5px; font-family: "Yu Mincho", serif; font-size: 21px; font-weight: 500; }
+    .progress-edit-summary p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; min-height: 46px; padding-top: 20px; }
+    .checkbox-row input { width: 18px; height: 18px; accent-color: var(--accent-dark); }
+    .dialog-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 22px; }
+    .dialog-actions-right { display: flex; gap: 9px; margin-left: auto; }
+    .detail-hero { display: grid; grid-template-columns: 62px 1fr; gap: 16px; align-items: center; margin-bottom: 18px; }
+    .detail-icon { width: 62px; height: 62px; display: grid; place-items: center; border-radius: 50%; color: var(--cat); background: color-mix(in srgb, var(--cat) 16%, white); }
+    .detail-icon .icon { width: 32px; height: 32px; }
+    .detail-category { color: var(--cat); font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+    .detail-event-title { margin: 4px 0 0; font-family: "Yu Mincho", serif; font-weight: 500; font-size: 27px; line-height: 1.35; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .detail-item { padding: 13px 14px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.57); color: #5f5046; font-size: 13px; line-height: 1.65; }
+    .detail-item.full { grid-column: 1 / -1; }
+    .detail-item strong { display: block; color: var(--ink); margin-bottom: 3px; font-size: 11px; }
+    .profile-intro { display: grid; grid-template-columns: 58px 1fr; align-items: center; gap: 15px; margin-bottom: 18px; padding: 15px; border: 1px solid var(--line); border-radius: 16px; background: rgba(246,241,234,.68); }
+    .profile-intro-icon { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 50%; color: #58715b; background: #e4eee3; }
+    .profile-intro-icon .icon { width: 29px; height: 29px; }
+    .profile-intro strong { display: block; margin-bottom: 5px; font-family: "Yu Mincho", serif; font-size: 19px; font-weight: 500; }
+    .profile-intro span { color: var(--muted); font-size: 11px; line-height: 1.7; }
+    .profile-error { min-height: 20px; margin: 8px 2px 0; color: #aa5555; font-size: 11px; }
+    .members-list { display: grid; gap: 9px; }
+    .member-row { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.62); }
+    .member-avatar { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: white; background: linear-gradient(145deg, #9aa891, #71816e); font-family: "Yu Mincho", serif; font-size: 17px; font-weight: 700; }
+    .member-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+    .member-meta { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .current-member-badge { padding: 5px 9px; border-radius: 999px; color: #5f745f; background: #e5eee3; white-space: nowrap; font-size: 9px; font-weight: 700; }
+    .members-empty { padding: 28px 15px; border: 1px dashed var(--line-strong); border-radius: 15px; color: var(--muted); text-align: center; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 24px; z-index: 100;
+      transform: translate(-50%, 25px); opacity: 0; pointer-events: none;
+      padding: 12px 18px; border-radius: 999px; color: white; background: rgba(53,41,34,.94);
+      box-shadow: 0 14px 34px rgba(53,41,34,.24); font-size: 13px; transition: .22s ease;
+    }
+    .toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+    @media (max-width: 1120px) {
+      .workspace { grid-template-columns: 1fr; }
+      .event-list { max-height: 520px; }
+      .hero { grid-template-columns: 1fr; align-items: start; }
+      .month-toolbar { justify-content: flex-start; }
+      .progress-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 760px) {
+      .login-card { padding: 28px 22px; border-radius: 24px; }
+      .login-brand { margin-bottom: 28px; }
+      .login-title { font-size: 29px; }
+      .app { width: calc(100% - 16px); padding-top: 8px; }
+      .topbar { top: 8px; min-height: 62px; padding: 9px 10px 9px 13px; border-radius: 17px; }
+      .brand { min-width: auto; }
+      .brand-mark { width: 38px; height: 38px; }
+      .brand-name { font-size: 16px; }
+      .brand-sub { display: none; }
+      .top-actions .button span.label { display: none; }
+      .top-actions .button { width: 42px; min-height: 42px; padding: 0; }
+      .top-actions .profile-button { width: 42px; padding: 5px; }
+      .hero { padding: 30px 8px 18px; gap: 20px; }
+      .hero h1 { font-size: 35px; }
+      .hero-copy { font-size: 12px; }
+      .month-toolbar { display: grid; grid-template-columns: 48px 1fr 48px auto; width: 100%; }
+      .nav-button { width: 48px; height: 50px; }
+      .month-label { min-width: 0; width: 100%; height: 50px; padding: 0 8px; font-size: 17px; }
+      .today-button { height: 50px; }
+      .category-bar { border-radius: 16px; }
+      .workspace { gap: 14px; }
+      .panel { border-radius: 21px; }
+      .calendar-panel { padding: 11px; }
+      .calendar-head { margin: 4px 2px 12px; }
+      .legend { display: none; }
+      .weekdays div { padding-bottom: 8px; font-size: 11px; }
+      .calendar-grid { border-radius: 12px; }
+      .day { min-height: 86px; padding: 5px 2px; }
+      .date-number { width: 25px; height: 25px; margin-left: 2px; font-size: 11px; }
+      .event-chip { min-height: 17px; height: 17px; padding: 1px 3px; border-radius: 999px; justify-content: center; }
+      .event-chip .event-time, .event-chip .event-title { display: none; }
+      .event-chip .dot { width: 8px; height: 8px; }
+      .more-events { margin-left: 4px; font-size: 8px; }
+      .calendar-summary { grid-template-columns: 1fr; }
+      .summary-card { min-height: 58px; }
+      .side-panel { padding: 15px; }
+      .progress-panel { padding: 16px; }
+      .progress-head { align-items: flex-start; flex-direction: column; }
+      .progress-overall { width: 100%; }
+      .progress-board { grid-template-columns: 1fr; }
+      .progress-card { grid-template-columns: 68px minmax(0, 1fr); }
+      .progress-ring { width: 68px; height: 68px; }
+      .progress-ring::before { width: 52px; height: 52px; }
+      .tips { grid-template-columns: auto 1fr; padding: 14px; }
+      .storage-badge { grid-column: 2; justify-self: start; }
+      .share-banner { align-items: flex-start; flex-direction: column; }
+      .form-grid, .detail-grid { grid-template-columns: 1fr; }
+      .field.full, .detail-item.full { grid-column: auto; }
+      .checkbox-row { padding-top: 0; }
+      .dialog-card { padding: 18px; border-radius: 21px; }
+      .dialog-actions { flex-wrap: wrap; }
+    }
+    @media print {
+      body { background: white; }
+      body::before, .leaf-art, .topbar, .category-bar, .side-panel, .tips, .share-banner { display: none !important; }
+      .app { width: 100%; padding: 0; }
+      .hero { padding: 0 0 18px; }
+      .month-toolbar { display: none; }
+      .workspace { display: block; }
+      .calendar-panel { box-shadow: none; border: 1px solid #ccc; }
+      .day { min-height: 110px; }
+    }
+  </style>
+</head>
+<body>
+  <svg class="leaf-art left" viewBox="0 0 220 320" aria-hidden="true">
+    <path d="M104 310C106 213 132 115 205 22" fill="none" stroke="currentColor" stroke-width="2"/>
+    <g fill="currentColor">
+      <ellipse cx="158" cy="64" rx="24" ry="51" transform="rotate(42 158 64)" opacity=".78"/>
+      <ellipse cx="111" cy="119" rx="26" ry="54" transform="rotate(-31 111 119)" opacity=".62"/>
+      <ellipse cx="155" cy="172" rx="24" ry="51" transform="rotate(35 155 172)" opacity=".48"/>
+      <ellipse cx="90" cy="218" rx="22" ry="47" transform="rotate(-26 90 218)" opacity=".42"/>
+    </g>
+  </svg>
+  <svg class="leaf-art right" viewBox="0 0 220 320" aria-hidden="true">
+    <path d="M111 310C110 218 89 116 22 31" fill="none" stroke="currentColor" stroke-width="2"/>
+    <g fill="currentColor">
+      <ellipse cx="65" cy="76" rx="24" ry="50" transform="rotate(-41 65 76)" opacity=".72"/>
+      <ellipse cx="117" cy="131" rx="27" ry="54" transform="rotate(34 117 131)" opacity=".55"/>
+      <ellipse cx="75" cy="187" rx="22" ry="46" transform="rotate(-32 75 187)" opacity=".45"/>
+    </g>
+  </svg>
+
+  <section class="login-screen" id="loginScreen" aria-labelledby="loginTitle">
+    <div class="login-card">
+      <div class="login-brand">
+        <span class="login-mark" id="loginBrandIcon" aria-hidden="true"></span>
+        <span class="login-brand-name">YORI Calendar</span>
+      </div>
+      <form class="login-panel" id="inviteForm">
+        <div class="login-kicker">INVITATION</div>
+        <h1 class="login-title" id="loginTitle">招待コードを入力</h1>
+        <p class="login-copy">メンバーから共有された5文字の招待コードを入力してください。コードは毎週更新されます。</p>
+        <label class="login-field">
+          <span>招待コード</span>
+          <input class="invite-code-input" id="inviteCode" type="text" maxlength="5" inputmode="text" autocomplete="one-time-code" placeholder="A2B3C" required>
+        </label>
+        <button class="button primary login-submit" id="inviteButton" type="submit">次へ進む</button>
+        <p class="login-error" id="inviteError" role="alert"></p>
+        <div class="login-note"><span class="icon" id="loginCloudIcon"></span><span>予定はSupabaseで暗号化通信・リアルタイム同期されます</span></div>
+      </form>
+
+      <section class="login-panel" id="accountPanel" hidden>
+        <div class="login-kicker">MEMBER ACCOUNT</div>
+        <h1 class="login-title">アカウントを選択</h1>
+        <p class="login-copy">初めて使う方は新規作成、登録済みの方はログインを選んでください。</p>
+        <div class="auth-tabs" role="tablist" aria-label="アカウント操作">
+          <button class="auth-tab active" id="registerTab" type="button" role="tab" aria-selected="true">新規作成</button>
+          <button class="auth-tab" id="memberLoginTab" type="button" role="tab" aria-selected="false">ログイン</button>
+        </div>
+
+        <form id="registerForm">
+          <label class="login-field"><span>名前</span><input id="registerName" type="text" maxlength="30" autocomplete="username" placeholder="例：佐藤" required></label>
+          <label class="login-field"><span>パスワード（8文字以上）</span><span class="password-wrap"><span class="icon" id="registerLockIcon"></span><input id="registerPassword" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="パスワード" required><button class="password-toggle" type="button" data-password-toggle="registerPassword" aria-label="パスワードを表示">表示</button></span></label>
+          <label class="login-field"><span>パスワード確認</span><span class="password-wrap"><span class="icon" id="confirmLockIcon"></span><input id="registerPasswordConfirm" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="もう一度入力" required><button class="password-toggle" type="button" data-password-toggle="registerPasswordConfirm" aria-label="パスワードを表示">表示</button></span></label>
+          <p class="login-warning">メールを使わないため、パスワードを忘れた場合は自動で再発行できません。忘れないものを設定してください。</p>
+          <button class="button primary login-submit" id="registerButton" type="submit">アカウントを作成</button>
+          <p class="login-error" id="registerError" role="alert"></p>
+        </form>
+
+        <form id="memberLoginForm" hidden>
+          <label class="login-field"><span>名前</span><input id="memberLoginName" type="text" maxlength="30" autocomplete="username" placeholder="登録した名前" required></label>
+          <label class="login-field"><span>パスワード</span><span class="password-wrap"><span class="icon" id="memberLoginLockIcon"></span><input id="memberLoginPassword" type="password" minlength="8" maxlength="72" autocomplete="current-password" placeholder="パスワード" required><button class="password-toggle" type="button" data-password-toggle="memberLoginPassword" aria-label="パスワードを表示">表示</button></span></label>
+          <button class="button primary login-submit" id="memberLoginButton" type="submit">ログインして開く</button>
+          <p class="login-error" id="memberLoginError" role="alert"></p>
+        </form>
+        <button class="login-back" id="backToInvite" type="button">← 招待コードの入力へ戻る</button>
+      </section>
+    </div>
+  </section>
+
+  <main class="app" id="calendarApp" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" id="brandIcon" aria-hidden="true"></span>
+        <span><span class="brand-name">YORI Calendar</span><span class="brand-sub">SHARED TEAM SCHEDULE</span></span>
+      </div>
+      <div class="top-actions" aria-label="データ操作">
+        <button class="button" id="exportButton" type="button"><span class="icon" id="exportIcon"></span><span class="label">書き出す</span></button>
+        <button class="button" id="importButton" type="button"><span class="icon" id="importIcon"></span><span class="label">読み込む</span></button>
+        <button class="button primary" id="shareButton" type="button"><span class="icon" id="shareIcon"></span><span class="label">招待する</span></button>
+        <button class="button profile-button" id="profileButton" type="button" aria-label="表示名を設定"><span class="profile-avatar" id="profileAvatar">?</span><span class="label profile-name" id="profileName">表示名設定</span></button>
+        <button class="button" id="logoutButton" type="button"><span class="icon" id="logoutIcon"></span><span class="label">ログアウト</span></button>
+        <input class="sr-only" id="importFile" type="file" accept="application/json,.json">
+      </div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">みんなの予定を、ひとつの場所に。</div>
+        <h1>チームカレンダー</h1>
+        <p class="hero-copy">日付を選んで予定を追加。会議・外出・締切を、やさしく見やすく共有できます。</p>
+      </div>
+      <div class="month-toolbar" aria-label="表示月を変更">
+        <button class="nav-button" id="previousMonth" type="button" aria-label="前の月">‹</button>
+        <button class="month-label" id="monthLabel" type="button" aria-label="年月を選択"></button>
+        <button class="nav-button" id="nextMonth" type="button" aria-label="次の月">›</button>
+        <button class="today-button" id="todayButton" type="button">今日</button>
+        <input id="monthPicker" type="month" tabindex="-1" aria-hidden="true">
+      </div>
+    </section>
+
+    <nav class="category-bar" id="categoryBar" aria-label="カテゴリで絞り込み"></nav>
+
+    <section class="workspace">
+      <section class="panel calendar-panel" aria-label="月間カレンダー">
+        <div class="calendar-head">
+          <span class="calendar-head-note">空いている日を選ぶと予定を追加できます</span>
+          <span class="legend"><span><i style="--c:var(--meeting)"></i>会議</span><span><i style="--c:var(--project)"></i>企画</span><span><i style="--c:var(--deadline)"></i>締切</span></span>
+        </div>
+        <div class="weekdays" aria-hidden="true"><div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div></div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="calendar-summary">
+          <div class="summary-card"><span class="summary-icon" id="monthCountIcon"></span><span><strong id="monthCount">0件</strong><small>今月の予定</small></span></div>
+          <button class="summary-card summary-button" id="memberSummaryButton" type="button" aria-label="登録メンバーを見る"><span class="summary-icon green" id="memberCountIcon"></span><span><strong id="memberCount">0人</strong><small>担当メンバー・一覧を見る</small></span></button>
+          <div class="summary-card"><span class="summary-icon blue" id="nextEventIcon"></span><span><strong id="nextEventText">—</strong><small>次の予定まで</small></span></div>
+        </div>
+      </section>
+
+      <aside class="panel side-panel" aria-label="予定一覧">
+        <div class="side-head">
+          <div><div class="side-kicker">UPCOMING</div><h2 class="side-title">これからの予定</h2></div>
+          <button class="add-button" id="newEventButton" type="button" aria-label="新しい予定を追加"><span class="icon" id="plusIcon"></span></button>
+        </div>
+        <label class="search-box"><span class="icon" id="searchIcon"></span><span class="sr-only">予定を検索</span><input id="searchInput" type="search" placeholder="予定・場所・担当者を検索"></label>
+        <div class="event-list" id="eventList"></div>
+      </aside>
+    </section>
+
+    <section class="panel progress-panel" aria-labelledby="progressTitle">
+      <div class="progress-head">
+        <div>
+          <div class="side-kicker">PROGRESS</div>
+          <h2 class="progress-title" id="progressTitle">みんなの進捗</h2>
+          <p class="progress-copy">予定ごとのチェックリスト達成率です。カードを選ぶと内容と完了状況を変更できます。</p>
+        </div>
+        <div class="progress-overall"><span class="icon" id="overallProgressIcon"></span><span><strong id="overallProgress">0%</strong><small>全体の達成率</small></span></div>
+      </div>
+      <div class="progress-board" id="progressBoard"></div>
+    </section>
+
+    <section class="tips">
+      <span class="icon" id="infoIcon"></span>
+      <span><strong>リアルタイム共有：</strong>同じURLを開いたメンバー全員に、予定の追加・編集・削除が自動で反映されます。</span>
+      <span class="storage-badge syncing" id="syncStatus">接続中…</span>
+    </section>
+  </main>
+
+  <dialog id="eventDialog" aria-labelledby="eventDialogTitle">
+    <form class="dialog-card" id="eventForm" method="dialog">
+      <div class="dialog-head">
+        <div><div class="dialog-kicker">SCHEDULE</div><h2 class="dialog-title" id="eventDialogTitle">予定を追加</h2></div>
+        <button class="close-button" type="button" data-close="eventDialog" aria-label="閉じる"><span class="icon" id="formCloseIcon"></span></button>
+      </div>
+      <input id="eventId" type="hidden">
+      <div class="form-grid">
+        <div class="field full"><label for="eventTitle">予定名 *</label><input id="eventTitle" type="text" maxlength="60" placeholder="例：週次ミーティング" required></div>
+        <div class="field"><label for="eventDate">日付 *</label><input id="eventDate" type="date" required></div>
+        <label class="checkbox-row"><input id="allDay" type="checkbox"><span>終日の予定</span></label>
+        <div class="field"><label for="startTime">開始時刻</label><input id="startTime" type="time" value="10:00"></div>
+        <div class="field"><label for="endTime">終了時刻</label><input id="endTime" type="time" value="11:00"></div>
+        <div class="field"><label for="eventCategory">カテゴリ</label><select id="eventCategory"></select></div>
+        <div class="field"><label for="eventOwner">担当者</label><input id="eventOwner" type="text" maxlength="30" list="memberOptions" placeholder="登録メンバーから選択"><datalist id="memberOptions"></datalist></div>
+        <div class="field full"><label for="eventPlace">場所・URL</label><input id="eventPlace" type="text" maxlength="120" placeholder="例：3F 会議室 / オンラインURL"></div>
+        <div class="field full"><label for="eventMembers">参加メンバー</label><input id="eventMembers" type="text" maxlength="160" placeholder="例：佐藤、鈴木、田中"><span class="field-help">読点「、」またはカンマ区切りで入力できます</span></div>
+        <div class="field full"><label for="eventMemo">メモ</label><textarea id="eventMemo" maxlength="500" placeholder="持ち物や連絡事項など"></textarea></div>
+        <section class="task-field" aria-labelledby="eventTasksTitle">
+          <div class="task-field-head">
+            <span class="task-field-title" id="eventTasksTitle"><span class="icon" id="eventTasksIcon"></span>進捗チェックリスト</span>
+            <button class="task-add" id="addEventTask" type="button">＋ やることを追加</button>
+          </div>
+          <div class="task-editor" id="eventTasksEditor"></div>
+          <span class="field-help">やることを分けて登録すると、完了した数から進捗率を自動計算します。</span>
+        </section>
+      </div>
+      <div class="dialog-actions">
+        <button class="button danger" id="deleteFromForm" type="button" hidden>この予定を削除</button>
+        <div class="dialog-actions-right"><button class="button" type="button" data-close="eventDialog">キャンセル</button><button class="button primary" type="submit">保存する</button></div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="detailDialog" aria-labelledby="detailTitle">
+    <div class="dialog-card">
+      <div class="dialog-head">
+        <div><div class="dialog-kicker">EVENT DETAIL</div><h2 class="dialog-title">予定の詳細</h2></div>
+        <button class="close-button" type="button" data-close="detailDialog" aria-label="閉じる"><span class="icon" id="detailCloseIcon"></span></button>
+      </div>
+      <div id="detailContent"></div>
+      <div class="dialog-actions"><button class="button danger" id="deleteEventButton" type="button">削除する</button><div class="dialog-actions-right"><button class="button" type="button" data-close="detailDialog">閉じる</button><button class="button primary" id="editEventButton" type="button">編集する</button></div></div>
+    </div>
+  </dialog>
+
+  <dialog id="progressDialog" aria-labelledby="progressDialogTitle">
+    <form class="dialog-card" id="progressForm" method="dialog">
+      <div class="dialog-head">
+        <div><div class="dialog-kicker">PROGRESS EDITOR</div><h2 class="dialog-title" id="progressDialogTitle">進捗を更新</h2></div>
+        <button class="close-button" type="button" data-close="progressDialog" aria-label="閉じる"><span class="icon" id="progressCloseIcon"></span></button>
+      </div>
+      <input id="progressEventId" type="hidden">
+      <div class="progress-edit-summary" id="progressEditSummary"></div>
+      <section class="task-field" aria-labelledby="progressTasksTitle">
+        <div class="task-field-head">
+          <span class="task-field-title" id="progressTasksTitle"><span class="icon" id="progressTasksIcon"></span>やること・完了状況</span>
+          <button class="task-add" id="addProgressTask" type="button">＋ やることを追加</button>
+        </div>
+        <div class="task-editor" id="progressTasksEditor"></div>
+      </section>
+      <div class="dialog-actions"><span class="field-help">チェック数に応じてグラフが自動更新されます。</span><div class="dialog-actions-right"><button class="button" type="button" data-close="progressDialog">キャンセル</button><button class="button primary" type="submit">進捗を保存</button></div></div>
+    </form>
+  </dialog>
+
+  <dialog id="profileDialog" aria-labelledby="profileDialogTitle">
+    <form class="dialog-card" id="profileForm" method="dialog">
+      <div class="dialog-head">
+        <div><div class="dialog-kicker">YOUR PROFILE</div><h2 class="dialog-title" id="profileDialogTitle">表示名を決める</h2></div>
+        <button class="close-button" id="profileCloseButton" type="button" data-close="profileDialog" aria-label="閉じる"><span class="icon" id="profileCloseIcon"></span></button>
+      </div>
+      <div class="profile-intro"><span class="profile-intro-icon" id="profileUsersIcon"></span><span><strong>チームで使う名前</strong><span>名前を変更すると、次回から新しい名前でログインします。</span></span></div>
+      <div class="field"><label for="profileDisplayName">アカウント名 *</label><input id="profileDisplayName" type="text" maxlength="30" autocomplete="nickname" placeholder="例：佐藤" required><span class="field-help">1〜30文字。同じ名前は重複して登録できません。</span></div>
+      <p class="profile-error" id="profileError" role="alert"></p>
+      <span class="field-help">アカウントを削除しても、共有済みの予定や進捗は残ります。</span>
+      <div class="dialog-actions"><button class="button danger" id="deleteProfileButton" type="button">アカウントを削除</button><div class="dialog-actions-right"><button class="button" id="profileCancelButton" type="button" data-close="profileDialog">キャンセル</button><button class="button primary" type="submit">名前を保存</button></div></div>
+    </form>
+  </dialog>
+
+  <dialog id="inviteDialog" aria-labelledby="inviteDialogTitle">
+    <div class="dialog-card">
+      <div class="dialog-head">
+        <div><div class="dialog-kicker">INVITE MEMBERS</div><h2 class="dialog-title" id="inviteDialogTitle">メンバーを招待</h2></div>
+        <button class="close-button" type="button" data-close="inviteDialog" aria-label="閉じる"><span class="icon" id="inviteCloseIcon"></span></button>
+      </div>
+      <div class="invite-share-card">
+        <span class="field-help">現在の招待コード</span>
+        <strong class="invite-code-display" id="currentInviteCode">-----</strong>
+        <span class="invite-code-expiry" id="currentInviteExpiry">確認中…</span>
+      </div>
+      <p class="field-help">このコードとサイトのURLを新しいメンバーに共有してください。招待コードは毎週月曜日の0時に更新されます。</p>
+      <div class="invite-actions"><button class="button" id="copyInviteCodeButton" type="button">コードをコピー</button><button class="button primary" id="copyInviteLinkButton" type="button">リンクをコピー</button></div>
+    </div>
+  </dialog>
+
+  <dialog id="membersDialog" aria-labelledby="membersDialogTitle">
+    <div class="dialog-card">
+      <div class="dialog-head">
+        <div><div class="dialog-kicker">TEAM MEMBERS</div><h2 class="dialog-title" id="membersDialogTitle">担当メンバー</h2></div>
+        <button class="close-button" type="button" data-close="membersDialog" aria-label="閉じる"><span class="icon" id="membersCloseIcon"></span></button>
+      </div>
+      <div class="members-list" id="membersList"></div>
+      <div class="dialog-actions"><span class="field-help">同じURLを使うメンバーの表示名です。</span><div class="dialog-actions-right"><button class="button" type="button" data-close="membersDialog">閉じる</button><button class="button primary" id="editProfileButton" type="button">自分の表示名を変更</button></div></div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.7/+esm';
+    const ICONS = {
+      calendar: '<svg viewBox="0 0 24 24"><path d="M6 3v3M18 3v3M3.5 9h17M5 5h14a1.5 1.5 0 0 1 1.5 1.5v13A1.5 1.5 0 0 1 19 21H5a1.5 1.5 0 0 1-1.5-1.5v-13A1.5 1.5 0 0 1 5 5Z"/><path d="M7.5 13h3v3h-3z"/></svg>',
+      download: '<svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19.5h16"/></svg>',
+      upload: '<svg viewBox="0 0 24 24"><path d="M12 16V4m0 0 4 4m-4-4L8 8M4 19.5h16"/></svg>',
+      share: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg>',
+      plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+      search: '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>',
+      info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 10.5v6M12 7.5h.01"/></svg>',
+      lock: '<svg viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>',
+      cloud: '<svg viewBox="0 0 24 24"><path d="M7 18.5h10.5a4 4 0 0 0 .4-8A6.2 6.2 0 0 0 6.3 9.2 4.7 4.7 0 0 0 7 18.5Z"/><path d="m9.5 14 1.8 1.8 3.5-4"/></svg>',
+      logout: '<svg viewBox="0 0 24 24"><path d="M10 4H5v16h5M14 8l4 4-4 4M8 12h10"/></svg>',
+      close: '<svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>',
+      users: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19v-1.5A4.5 4.5 0 0 1 7.5 13h3A4.5 4.5 0 0 1 15 17.5V19M16 5.5a3 3 0 0 1 0 5.8M17 13a4 4 0 0 1 4 4v2"/></svg>',
+      clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+      progress: '<svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/><path d="M2 19h20"/></svg>',
+      check: '<svg viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"/></svg>',
+      edit: '<svg viewBox="0 0 24 24"><path d="m14.5 5.5 4 4M5 19l2.5-6.5L16 4l4 4-8.5 8.5Z"/><path d="M12 20H4v-8"/></svg>',
+      trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>',
+      meeting: '<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20v-2a4.5 4.5 0 0 1 4.5-4.5h2A4.5 4.5 0 0 1 13.5 18v2M14 14a4 4 0 0 1 7.5 2v4"/></svg>',
+      project: '<svg viewBox="0 0 24 24"><path d="M4 20V6.5A1.5 1.5 0 0 1 5.5 5h4L11 7h7.5A1.5 1.5 0 0 1 20 8.5V20Z"/><path d="M8 12h8M8 16h5"/></svg>',
+      outing: '<svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/></svg>',
+      deadline: '<svg viewBox="0 0 24 24"><path d="M6 3v3M18 3v3M4 8h16v12H4Z"/><path d="m8 14 2.5 2.5L16 11"/></svg>',
+      social: '<svg viewBox="0 0 24 24"><path d="M4 8h12v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5ZM16 10h2a2.5 2.5 0 0 1 0 5h-2M7 4c1-1 1-2 0-3M12 4c1-1 1-2 0-3"/></svg>',
+      other: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".8" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r=".8" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r=".8" fill="currentColor" stroke="none"/></svg>'
+    };
+
+    const CATEGORIES = [
+      { id: 'meeting', name: '会議', color: 'var(--meeting)' },
+      { id: 'project', name: 'プロジェクト', color: 'var(--project)' },
+      { id: 'outing', name: '外出・訪問', color: 'var(--outing)' },
+      { id: 'deadline', name: '締切', color: 'var(--deadline)' },
+      { id: 'social', name: '交流', color: 'var(--social)' },
+      { id: 'other', name: 'その他', color: 'var(--other)' }
+    ];
+
+    const SUPABASE_URL = 'https://cefxqauiezsqzbaluupk.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_HATCfyLEFds4vtIb_s4k3Q_YWKL8L4O';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+    });
+    const $ = id => document.getElementById(id);
+    const pad = n => String(n).padStart(2, '0');
+    const toDateString = date => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    const parseLocalDate = value => { const [y,m,d] = value.split('-').map(Number); return new Date(y, m - 1, d); };
+    const category = id => CATEGORIES.find(item => item.id === id) || CATEGORIES[5];
+    const icon = name => `<span class="icon">${ICONS[name] || ICONS.other}</span>`;
+    const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+    const uid = () => crypto.randomUUID();
+
+    let viewDate = new Date();
+    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+    let selectedDate = new Date();
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let selectedEventId = null;
+    let toastTimer;
+    let realtimeChannel = null;
+    let realtimeRefreshTimer = null;
+    let membersRealtimeChannel = null;
+    let membersRealtimeRefreshTimer = null;
+    let teamMembers = [];
+    let currentMemberId = null;
+    let verifiedInviteCode = '';
+    let events = [];
+
+    function normalizeTasks(source) {
+      if (!Array.isArray(source)) return [];
+      return source.slice(0, 30).map(task => ({
+        id: /^[0-9a-f-]{20,}$/i.test(String(task?.id || '')) ? String(task.id) : uid(),
+        title: String(task?.title || '').trim().slice(0, 80),
+        completed: Boolean(task?.completed)
+      })).filter(task => task.title);
+    }
+
+    function progressOf(eventOrTasks) {
+      const tasks = Array.isArray(eventOrTasks) ? normalizeTasks(eventOrTasks) : normalizeTasks(eventOrTasks?.tasks);
+      const done = tasks.filter(task => task.completed).length;
+      return { tasks, done, total: tasks.length, percent: tasks.length ? Math.round(done / tasks.length * 100) : 0 };
+    }
+
+    function normalizeEvent(raw) {
+      if (!raw || typeof raw !== 'object' || !/^\d{4}-\d{2}-\d{2}$/.test(raw.date || '') || !String(raw.title || '').trim()) return null;
+      return {
+        id: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(raw.id || '') ? raw.id : uid(),
+        title: String(raw.title).trim().slice(0, 60),
+        date: raw.date,
+        start: /^\d{2}:\d{2}$/.test(raw.start || '') ? raw.start : '',
+        end: /^\d{2}:\d{2}$/.test(raw.end || '') ? raw.end : '',
+        allDay: Boolean(raw.allDay),
+        category: CATEGORIES.some(c => c.id === raw.category) ? raw.category : 'other',
+        place: String(raw.place || '').slice(0, 120),
+        owner: String(raw.owner || '').slice(0, 30),
+        members: Array.isArray(raw.members) ? raw.members.map(v => String(v).trim()).filter(Boolean).slice(0, 30) : [],
+        memo: String(raw.memo || '').slice(0, 500),
+        tasks: normalizeTasks(raw.tasks)
+      };
+    }
+
+    function fromDatabase(row) {
+      return normalizeEvent({
+        id: row.id,
+        title: row.title,
+        date: row.event_date,
+        start: row.start_time ? String(row.start_time).slice(0, 5) : '',
+        end: row.end_time ? String(row.end_time).slice(0, 5) : '',
+        allDay: row.all_day,
+        category: row.category,
+        place: row.place,
+        owner: row.owner_name,
+        members: row.members,
+        memo: row.memo,
+        tasks: row.tasks
+      });
+    }
+
+    function toDatabase(event) {
+      return {
+        id: event.id,
+        title: event.title,
+        event_date: event.date,
+        start_time: event.allDay || !event.start ? null : event.start,
+        end_time: event.allDay || !event.end ? null : event.end,
+        all_day: event.allDay,
+        category: event.category,
+        place: event.place,
+        owner_name: event.owner,
+        members: event.members,
+        memo: event.memo,
+        tasks: normalizeTasks(event.tasks),
+        updated_at: new Date().toISOString()
+      };
+    }
+
+    function setSyncStatus(text, state = 'syncing') {
+      const badge = $('syncStatus');
+      badge.textContent = text;
+      badge.classList.remove('syncing', 'offline');
+      if (state !== 'online') badge.classList.add(state);
+    }
+
+    function currentMember() {
+      return teamMembers.find(member => member.id === currentMemberId) || null;
+    }
+
+    function memberInitial(name) {
+      return String(name || '?').trim().slice(0, 1).toLocaleUpperCase('ja') || '?';
+    }
+
+    function renderMemberUi() {
+      const mine = currentMember();
+      $('memberCount').textContent = `${teamMembers.length}人`;
+      $('profileAvatar').textContent = memberInitial(mine?.displayName);
+      $('profileName').textContent = mine?.displayName || '表示名設定';
+      $('profileButton').setAttribute('aria-label', mine ? `${mine.displayName}の表示名を変更` : '表示名を設定');
+      $('memberOptions').innerHTML = teamMembers.map(member => `<option value="${escapeHtml(member.displayName)}"></option>`).join('');
+      renderMembersList();
+    }
+
+    function renderMembersList() {
+      $('membersList').innerHTML = teamMembers.length
+        ? teamMembers.map(member => `<div class="member-row"><span class="member-avatar">${escapeHtml(memberInitial(member.displayName))}</span><span><span class="member-name">${escapeHtml(member.displayName)}</span><span class="member-meta">共有カレンダーの登録メンバー</span></span>${member.id === currentMemberId ? '<span class="current-member-badge">あなた</span>' : ''}</div>`).join('')
+        : '<div class="members-empty">登録メンバーはまだいません。</div>';
+    }
+
+    async function loadMembersFromCloud() {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('id,display_name,created_at,updated_at')
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      teamMembers = (data || []).map(row => ({
+        id: row.id,
+        displayName: String(row.display_name || '').trim().slice(0, 30),
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      })).filter(member => member.displayName);
+      renderMemberUi();
+    }
+
+    async function subscribeMembersRealtime() {
+      if (membersRealtimeChannel) await supabase.removeChannel(membersRealtimeChannel);
+      membersRealtimeChannel = supabase
+        .channel('yori-calendar-members')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'team_members' }, () => {
+          clearTimeout(membersRealtimeRefreshTimer);
+          membersRealtimeRefreshTimer = setTimeout(() => {
+            loadMembersFromCloud().catch(() => toast('最新のメンバーを取得できませんでした'));
+          }, 120);
+        })
+        .subscribe();
+    }
+
+    function openProfileEditor() {
+      const mine = currentMember();
+      if (!mine) return;
+      $('profileDialogTitle').textContent = 'アカウント名を変更';
+      $('profileDisplayName').value = mine?.displayName || '';
+      $('profileError').textContent = '';
+      const submit = $('profileForm').querySelector('button[type="submit"]');
+      submit.textContent = '名前を保存';
+      if (!$('profileDialog').open) $('profileDialog').showModal();
+      requestAnimationFrame(() => $('profileDisplayName').focus());
+    }
+
+    async function deleteCurrentMember() {
+      const mine = currentMember();
+      if (!mine) return;
+      const confirmed = confirm(`「${mine.displayName}」のアカウントを完全に削除しますか？\n\nこの名前とパスワードではログインできなくなります。\n過去の予定と進捗は削除されません。`);
+      if (!confirmed) return;
+      const button = $('deleteProfileButton');
+      button.disabled = true;
+      button.textContent = '削除しています…';
+      try {
+        await invokeMemberAuth('deleteAccount');
+        $('profileDialog').close();
+        await supabase.auth.signOut({ scope: 'local' });
+        await lockCalendar();
+        toast('アカウントを削除しました');
+      } catch (error) {
+        console.error(error);
+        $('profileError').textContent = `アカウントを削除できませんでした。${error?.message || ''}`;
+      } finally {
+        button.disabled = false;
+        button.textContent = 'アカウントを削除';
+      }
+    }
+
+    async function loadEventsFromCloud({ quiet = false } = {}) {
+      if (!quiet) setSyncStatus('同期中…');
+      const { data, error } = await supabase
+        .from('calendar_events')
+        .select('id,title,event_date,start_time,end_time,all_day,category,place,owner_name,members,memo,tasks,updated_at')
+        .order('event_date', { ascending: true })
+        .order('start_time', { ascending: true, nullsFirst: true });
+      if (error) {
+        setSyncStatus('同期エラー', 'offline');
+        throw error;
+      }
+      events = (data || []).map(fromDatabase).filter(Boolean);
+      renderAll();
+      setSyncStatus('リアルタイム同期中', 'online');
+    }
+
+    async function subscribeRealtime() {
+      if (realtimeChannel) await supabase.removeChannel(realtimeChannel);
+      realtimeChannel = supabase
+        .channel('yori-calendar-events')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'calendar_events' }, () => {
+          clearTimeout(realtimeRefreshTimer);
+          realtimeRefreshTimer = setTimeout(() => {
+            loadEventsFromCloud({ quiet: true }).catch(() => toast('最新の予定を取得できませんでした'));
+          }, 120);
+        })
+        .subscribe(status => {
+          if (status === 'SUBSCRIBED') setSyncStatus('リアルタイム同期中', 'online');
+          else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setSyncStatus('再接続中…', 'offline');
+          else setSyncStatus('接続中…');
+        });
+    }
+
+    async function invokeMemberAuth(action, payload = {}) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers = { 'Content-Type': 'application/json', apikey: SUPABASE_KEY };
+      if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/member-auth`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ action, ...payload })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw Object.assign(new Error(data.error || '処理できませんでした。'), { status: response.status });
+      return data;
+    }
+
+    function selectAccountMode(mode) {
+      const registering = mode === 'register';
+      $('registerForm').hidden = !registering;
+      $('memberLoginForm').hidden = registering;
+      $('registerTab').classList.toggle('active', registering);
+      $('memberLoginTab').classList.toggle('active', !registering);
+      $('registerTab').setAttribute('aria-selected', registering ? 'true' : 'false');
+      $('memberLoginTab').setAttribute('aria-selected', registering ? 'false' : 'true');
+      const target = registering ? $('registerName') : $('memberLoginName');
+      requestAnimationFrame(() => target.focus());
+    }
+
+    function showInviteStep() {
+      verifiedInviteCode = '';
+      $('inviteForm').hidden = false;
+      $('accountPanel').hidden = true;
+      $('inviteCode').value = '';
+      $('inviteError').textContent = '';
+      requestAnimationFrame(() => $('inviteCode').focus());
+    }
+
+    function showAccountStep(code) {
+      verifiedInviteCode = code;
+      $('inviteForm').hidden = true;
+      $('accountPanel').hidden = false;
+      $('registerError').textContent = '';
+      $('memberLoginError').textContent = '';
+      selectAccountMode('register');
+    }
+
+    async function establishSession(session) {
+      const { error } = await supabase.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token
+      });
+      if (error) throw error;
+      await unlockCalendar();
+    }
+
+    async function unlockCalendar() {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) throw error || new Error('ログイン情報を確認できません。');
+      currentMemberId = user.id;
+      await Promise.all([loadEventsFromCloud(), loadMembersFromCloud()]);
+      if (!currentMember()) throw new Error('このアカウントは利用できません。');
+      await Promise.all([subscribeRealtime(), subscribeMembersRealtime()]);
+      $('loginScreen').hidden = true;
+      $('calendarApp').hidden = false;
+    }
+
+    async function lockCalendar() {
+      if (realtimeChannel) await supabase.removeChannel(realtimeChannel);
+      if (membersRealtimeChannel) await supabase.removeChannel(membersRealtimeChannel);
+      realtimeChannel = null;
+      membersRealtimeChannel = null;
+      events = [];
+      teamMembers = [];
+      currentMemberId = null;
+      ['eventDialog', 'detailDialog', 'progressDialog', 'profileDialog', 'membersDialog', 'inviteDialog'].forEach(id => { if ($(id)?.open) $(id).close(); });
+      $('calendarApp').hidden = true;
+      $('loginScreen').hidden = false;
+      $('registerForm').reset();
+      $('memberLoginForm').reset();
+      showInviteStep();
+    }
+
+    async function saveEventToCloud(item, editing) {
+      setSyncStatus('保存中…');
+      const request = editing
+        ? supabase.from('calendar_events').update(toDatabase(item)).eq('id', item.id)
+        : supabase.from('calendar_events').insert(toDatabase(item));
+      const { data, error } = await request.select().single();
+      if (error) {
+        setSyncStatus('保存エラー', 'offline');
+        throw error;
+      }
+      const saved = fromDatabase(data);
+      const index = events.findIndex(event => event.id === saved.id);
+      if (index >= 0) events[index] = saved; else events.push(saved);
+      renderAll();
+      setSyncStatus('リアルタイム同期中', 'online');
+    }
+
+    function toast(message) {
+      clearTimeout(toastTimer);
+      $('toast').textContent = message;
+      $('toast').classList.add('show');
+      toastTimer = setTimeout(() => $('toast').classList.remove('show'), 2300);
+    }
+
+    function monthEvents() {
+      const prefix = `${viewDate.getFullYear()}-${pad(viewDate.getMonth() + 1)}`;
+      return events.filter(event => event.date.startsWith(prefix));
+    }
+
+    function filteredEvents(source = events) {
+      const query = searchQuery.toLocaleLowerCase('ja');
+      return source.filter(event => {
+        if (activeCategory !== 'all' && event.category !== activeCategory) return false;
+        if (!query) return true;
+        return [event.title, event.place, event.owner, event.memo, ...event.members].join(' ').toLocaleLowerCase('ja').includes(query);
+      });
+    }
+
+    function eventTime(event) {
+      if (event.allDay) return '終日';
+      if (event.start && event.end) return `${event.start}〜${event.end}`;
+      return event.start || '時刻未定';
+    }
+
+    function dateLabel(value, withYear = false) {
+      const date = parseLocalDate(value);
+      const day = '日月火水木金土'[date.getDay()];
+      return `${withYear ? `${date.getFullYear()}年` : ''}${date.getMonth()+1}月${date.getDate()}日（${day}）`;
+    }
+
+    function renderCategoryBar() {
+      const all = `<button type="button" class="category-filter all ${activeCategory === 'all' ? 'active' : ''}" data-category="all">すべて</button>`;
+      $('categoryBar').innerHTML = all + CATEGORIES.map(cat => `<button type="button" class="category-filter ${activeCategory === cat.id ? 'active' : ''}" data-category="${cat.id}" style="--cat:${cat.color}">${icon(cat.id)}${cat.name}</button>`).join('');
+      $('categoryBar').querySelectorAll('[data-category]').forEach(button => button.addEventListener('click', () => {
+        activeCategory = button.dataset.category;
+        renderAll();
+      }));
+    }
+
+    function calendarDates() {
+      const first = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+      const start = new Date(first);
+      start.setDate(first.getDate() - first.getDay());
+      return Array.from({ length: 42 }, (_, index) => {
+        const date = new Date(start);
+        date.setDate(start.getDate() + index);
+        return date;
+      });
+    }
+
+    function renderCalendar() {
+      $('monthLabel').textContent = `${viewDate.getFullYear()}年 ${viewDate.getMonth()+1}月`;
+      $('monthPicker').value = `${viewDate.getFullYear()}-${pad(viewDate.getMonth()+1)}`;
+      const today = toDateString(new Date());
+      const visible = filteredEvents();
+      $('calendarGrid').innerHTML = calendarDates().map(date => {
+        const value = toDateString(date);
+        const dayEvents = visible.filter(event => event.date === value).sort((a,b) => (a.start || '').localeCompare(b.start || '') || a.title.localeCompare(b.title, 'ja'));
+        const classes = [
+          'day',
+          date.getMonth() !== viewDate.getMonth() ? 'other' : '',
+          value === today ? 'today' : '',
+          value === toDateString(selectedDate) ? 'selected' : '',
+          date.getDay() === 0 ? 'sunday' : '',
+          date.getDay() === 6 ? 'saturday' : ''
+        ].filter(Boolean).join(' ');
+        const chips = dayEvents.slice(0, 3).map(event => {
+          const cat = category(event.category);
+          return `<button type="button" class="event-chip" data-event-id="${escapeHtml(event.id)}" style="--cat:${cat.color}" title="${escapeHtml(event.title)}"><span class="dot"></span><span class="event-time">${escapeHtml(event.allDay ? '終日' : event.start || '')}</span><span class="event-title">${escapeHtml(event.title)}</span></button>`;
+        }).join('');
+        return `<div class="${classes}" data-date="${value}" role="button" tabindex="0" aria-label="${dateLabel(value)}。予定${dayEvents.length}件"><span class="date-number">${date.getDate()}</span>${chips}${dayEvents.length > 3 ? `<div class="more-events">ほか ${dayEvents.length - 3}件</div>` : ''}</div>`;
+      }).join('');
+
+      $('calendarGrid').querySelectorAll('.day').forEach(day => {
+        const openDay = () => { selectedDate = parseLocalDate(day.dataset.date); openEventForm(null, day.dataset.date); };
+        day.addEventListener('click', event => { if (!event.target.closest('.event-chip')) openDay(); });
+        day.addEventListener('keydown', event => { if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('.event-chip')) { event.preventDefault(); openDay(); } });
+      });
+      $('calendarGrid').querySelectorAll('[data-event-id]').forEach(button => button.addEventListener('click', event => { event.stopPropagation(); openDetail(button.dataset.eventId); }));
+      renderSummary();
+    }
+
+    function renderSummary() {
+      const current = monthEvents();
+      $('monthCount').textContent = `${current.length}件`;
+      $('memberCount').textContent = `${teamMembers.length}人`;
+      const today = toDateString(new Date());
+      const next = [...events].filter(event => event.date >= today).sort((a,b) => a.date.localeCompare(b.date) || (a.start || '').localeCompare(b.start || ''))[0];
+      if (!next) $('nextEventText').textContent = '—';
+      else {
+        const distance = Math.round((parseLocalDate(next.date) - parseLocalDate(today)) / 86400000);
+        $('nextEventText').textContent = distance === 0 ? '今日' : `${distance}日後`;
+      }
+    }
+
+    function renderEventList() {
+      const today = toDateString(new Date());
+      let list = filteredEvents().filter(event => event.date >= today).sort((a,b) => a.date.localeCompare(b.date) || (a.start || '').localeCompare(b.start || ''));
+      if (!list.length) list = filteredEvents().sort((a,b) => b.date.localeCompare(a.date)).slice(0, 8);
+      else list = list.slice(0, 12);
+      if (!list.length) {
+        $('eventList').innerHTML = `<div class="empty-state">${icon('calendar')}<strong>予定がありません</strong><span>右上の＋ボタンから追加できます</span></div>`;
+        return;
+      }
+      $('eventList').innerHTML = list.map(event => {
+        const cat = category(event.category);
+        const date = parseLocalDate(event.date);
+        const initial = (event.owner || '—').trim().slice(0,1);
+        const progress = progressOf(event);
+        return `<button type="button" class="list-card" data-event-id="${escapeHtml(event.id)}" style="--cat:${cat.color}"><span class="list-date"><strong>${date.getDate()}</strong><small>${date.getMonth()+1}月・${'日月火水木金土'[date.getDay()]}</small></span><span><span class="list-title">${escapeHtml(event.title)}</span><span class="list-meta">${escapeHtml(eventTime(event))}${event.place ? ` ・ ${escapeHtml(event.place)}` : ''}<br>${escapeHtml(cat.name)}${event.owner ? ` ・ 担当 ${escapeHtml(event.owner)}` : ''}</span></span><span class="owner-avatar" aria-label="担当 ${escapeHtml(event.owner || '未設定')}">${escapeHtml(initial)}</span><span class="mini-progress"><span class="mini-progress-label">${progress.total ? `${progress.done}/${progress.total} 完了` : 'タスク未設定'}</span><strong>${progress.percent}%</strong><span class="mini-progress-track"><span class="mini-progress-fill" style="width:${progress.percent}%"></span></span></span></button>`;
+      }).join('');
+      $('eventList').querySelectorAll('[data-event-id]').forEach(button => button.addEventListener('click', () => openDetail(button.dataset.eventId)));
+    }
+
+    function renderProgressBoard() {
+      const today = toDateString(new Date());
+      let list = filteredEvents().filter(event => event.date >= today).sort((a,b) => a.date.localeCompare(b.date) || (a.start || '').localeCompare(b.start || ''));
+      if (!list.length) list = filteredEvents().sort((a,b) => b.date.localeCompare(a.date));
+      list = list.slice(0, 9);
+      const allTasks = events.flatMap(event => normalizeTasks(event.tasks));
+      const done = allTasks.filter(task => task.completed).length;
+      $('overallProgress').textContent = `${allTasks.length ? Math.round(done / allTasks.length * 100) : 0}%`;
+      if (!list.length) {
+        $('progressBoard').innerHTML = `<div class="progress-empty">${icon('progress')}<strong>進捗セクションはまだありません</strong><span>予定を追加するときに「やること」を登録すると、ここにグラフが表示されます。</span></div>`;
+        return;
+      }
+      $('progressBoard').innerHTML = list.map(event => {
+        const cat = category(event.category);
+        const progress = progressOf(event);
+        const preview = progress.tasks.length
+          ? progress.tasks.slice(0, 3).map(task => `<span class="${task.completed ? 'done' : ''}"><i>${task.completed ? '✓' : ''}</i><b>${escapeHtml(task.title)}</b></span>`).join('')
+          : `<span><i></i><b>クリックして、やることを追加</b></span>`;
+        return `<button type="button" class="progress-card" data-progress-id="${escapeHtml(event.id)}" style="--cat:${cat.color}"><span class="progress-ring" style="--value:${progress.percent};--ring-color:${cat.color}"><strong>${progress.percent}%</strong></span><span><span class="progress-card-title">${escapeHtml(event.title)}</span><span class="progress-card-meta">${escapeHtml(event.owner || '担当者未設定')} ・ ${progress.done}/${progress.total} 完了</span><span class="progress-task-preview">${preview}</span></span><span class="progress-edit-hint">${icon('edit')}</span></button>`;
+      }).join('');
+      $('progressBoard').querySelectorAll('[data-progress-id]').forEach(button => button.addEventListener('click', () => openProgressEditor(button.dataset.progressId)));
+    }
+
+    function renderAll() {
+      renderCategoryBar();
+      renderCalendar();
+      renderEventList();
+      renderProgressBoard();
+    }
+
+    function collectTasks(containerId) {
+      return normalizeTasks([...$(containerId).querySelectorAll('.task-row')].map(row => ({
+        id: row.dataset.taskId,
+        title: row.querySelector('input[type="text"]').value,
+        completed: row.querySelector('input[type="checkbox"]').checked
+      })));
+    }
+
+    function renderTaskEditor(containerId, tasks = [], { startWithBlank = false } = {}) {
+      const editable = Array.isArray(tasks) ? tasks.slice(0, 30).map(task => ({
+        id: /^[0-9a-f-]{20,}$/i.test(String(task?.id || '')) ? String(task.id) : uid(),
+        title: String(task?.title || '').slice(0, 80),
+        completed: Boolean(task?.completed)
+      })) : [];
+      const rows = editable.length ? editable : (startWithBlank ? [{ id: uid(), title: '', completed: false }] : []);
+      const container = $(containerId);
+      container.innerHTML = rows.length ? rows.map(task => `<div class="task-row" data-task-id="${escapeHtml(task.id)}"><input type="checkbox" ${task.completed ? 'checked' : ''} aria-label="完了"><input type="text" maxlength="80" value="${escapeHtml(task.title)}" placeholder="例：資料を作成"><button class="task-remove" type="button" aria-label="この項目を削除">${icon('trash')}</button></div>`).join('') : `<div class="task-empty-note">「やることを追加」から項目を作成できます</div>`;
+      container.querySelectorAll('.task-remove').forEach(button => button.addEventListener('click', () => {
+        button.closest('.task-row').remove();
+        if (!container.querySelector('.task-row')) container.innerHTML = `<div class="task-empty-note">「やることを追加」から項目を作成できます</div>`;
+        if (containerId === 'progressTasksEditor') updateProgressEditSummary();
+      }));
+      if (containerId === 'progressTasksEditor') container.querySelectorAll('input').forEach(input => input.addEventListener('input', updateProgressEditSummary));
+    }
+
+    function addTaskRow(containerId) {
+      const tasks = collectTasks(containerId);
+      if (tasks.length >= 30) { toast('やることは30件まで登録できます'); return; }
+      tasks.push({ id: uid(), title: '', completed: false });
+      renderTaskEditor(containerId, tasks);
+      const inputs = $(containerId).querySelectorAll('input[type="text"]');
+      inputs[inputs.length - 1]?.focus();
+    }
+
+    function openEventForm(event = null, presetDate = null) {
+      const editing = Boolean(event);
+      $('eventDialogTitle').textContent = editing ? '予定を編集' : '予定を追加';
+      $('eventId').value = event?.id || '';
+      $('eventTitle').value = event?.title || '';
+      $('eventDate').value = event?.date || presetDate || toDateString(selectedDate);
+      $('allDay').checked = event?.allDay || false;
+      $('startTime').value = event?.start || '10:00';
+      $('endTime').value = event?.end || '11:00';
+      $('eventCategory').value = event?.category || 'meeting';
+      $('eventOwner').value = event?.owner || currentMember()?.displayName || '';
+      $('eventPlace').value = event?.place || '';
+      $('eventMembers').value = event?.members?.join('、') || '';
+      $('eventMemo').value = event?.memo || '';
+      renderTaskEditor('eventTasksEditor', event?.tasks || [], { startWithBlank: !editing });
+      $('deleteFromForm').hidden = !editing;
+      updateTimeFields();
+      $('eventDialog').showModal();
+      requestAnimationFrame(() => $('eventTitle').focus());
+    }
+
+    function updateTimeFields() {
+      const disabled = $('allDay').checked;
+      $('startTime').disabled = disabled;
+      $('endTime').disabled = disabled;
+    }
+
+    function openDetail(id) {
+      const event = events.find(item => item.id === id);
+      if (!event) return;
+      selectedEventId = id;
+      const cat = category(event.category);
+      const members = event.members.length ? event.members.join('、') : '未設定';
+      const progress = progressOf(event);
+      const taskDetail = progress.tasks.length ? progress.tasks.map(task => `${task.completed ? '✓' : '□'} ${escapeHtml(task.title)}`).join('<br>') : 'やることは未設定です。';
+      $('detailContent').innerHTML = `<div class="detail-hero" style="--cat:${cat.color}"><span class="detail-icon">${icon(cat.id)}</span><span><span class="detail-category">${escapeHtml(cat.name)}</span><h3 class="detail-event-title" id="detailTitle">${escapeHtml(event.title)}</h3></span></div><div class="detail-grid"><div class="detail-item"><strong>日時</strong>${escapeHtml(dateLabel(event.date, true))}<br>${escapeHtml(eventTime(event))}</div><div class="detail-item"><strong>場所・URL</strong>${escapeHtml(event.place || '未設定')}</div><div class="detail-item"><strong>担当者</strong>${escapeHtml(event.owner || '未設定')}</div><div class="detail-item"><strong>参加メンバー</strong>${escapeHtml(members)}</div><div class="detail-item full"><strong>進捗 ${progress.percent}%（${progress.done}/${progress.total} 完了）</strong>${taskDetail}</div><div class="detail-item full"><strong>メモ</strong>${event.memo ? escapeHtml(event.memo).replace(/\n/g, '<br>') : 'メモはありません。'}</div></div>`;
+      $('detailDialog').showModal();
+    }
+
+    function updateProgressEditSummary() {
+      const event = events.find(item => item.id === $('progressEventId').value);
+      if (!event) return;
+      const progress = progressOf(collectTasks('progressTasksEditor'));
+      const cat = category(event.category);
+      $('progressEditSummary').innerHTML = `<span class="progress-ring" style="--value:${progress.percent};--ring-color:${cat.color}"><strong>${progress.percent}%</strong></span><span><h3>${escapeHtml(event.title)}</h3><p>${progress.done}件完了 / 全${progress.total}件<br>チェックした割合から自動で計算しています。</p></span>`;
+    }
+
+    function openProgressEditor(id) {
+      const event = events.find(item => item.id === id);
+      if (!event) return;
+      $('progressEventId').value = id;
+      renderTaskEditor('progressTasksEditor', event.tasks);
+      updateProgressEditSummary();
+      $('progressDialog').showModal();
+    }
+
+    async function deleteEvent(id) {
+      const event = events.find(item => item.id === id);
+      if (!event || !confirm(`「${event.title}」を削除しますか？`)) return;
+      setSyncStatus('削除中…');
+      const { error } = await supabase.from('calendar_events').delete().eq('id', id);
+      if (error) {
+        setSyncStatus('削除エラー', 'offline');
+        alert(`予定を削除できませんでした。\n${error.message}`);
+        return;
+      }
+      events = events.filter(item => item.id !== id);
+      $('detailDialog').close();
+      $('eventDialog').close();
+      renderAll();
+      setSyncStatus('リアルタイム同期中', 'online');
+      toast('予定を削除しました');
+    }
+
+    function exportData() {
+      const payload = { app: 'YORI Calendar', version: 2, exportedAt: new Date().toISOString(), events };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `yori-calendar-${toDateString(new Date())}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast('バックアップを書き出しました');
+    }
+
+    async function importData(data, replace = true) {
+      const source = Array.isArray(data) ? data : data?.events;
+      if (!Array.isArray(source)) throw new Error('予定データが見つかりません');
+      let normalized = source.map(normalizeEvent).filter(Boolean);
+      if (!normalized.length && source.length) throw new Error('読み込める予定がありません');
+      setSyncStatus('読み込み中…');
+      if (replace) {
+        const { error: deleteError } = await supabase
+          .from('calendar_events')
+          .delete()
+          .neq('id', '00000000-0000-0000-0000-000000000000');
+        if (deleteError) throw deleteError;
+      } else {
+        const existingIds = new Set(events.map(event => event.id));
+        normalized = normalized.map(event => existingIds.has(event.id) ? { ...event, id: uid() } : event);
+      }
+      if (normalized.length) {
+        const { error: insertError } = await supabase
+          .from('calendar_events')
+          .insert(normalized.map(toDatabase));
+        if (insertError) throw insertError;
+      }
+      await loadEventsFromCloud({ quiet: true });
+      toast(`${normalized.length}件の予定を読み込みました`);
+    }
+
+    async function copyText(value, successMessage) {
+      try {
+        await navigator.clipboard.writeText(value);
+        toast(successMessage);
+      } catch {
+        prompt('以下をコピーしてください', value);
+      }
+    }
+
+    async function openInviteDialog() {
+      $('currentInviteCode').textContent = '-----';
+      $('currentInviteExpiry').textContent = '確認中…';
+      if (!$('inviteDialog').open) $('inviteDialog').showModal();
+      try {
+        const data = await invokeMemberAuth('currentInvite');
+        $('currentInviteCode').textContent = data.code;
+        const expires = new Date(data.expiresAt);
+        $('currentInviteExpiry').textContent = `${new Intl.DateTimeFormat('ja-JP', { month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' }).format(expires)}まで有効`;
+      } catch (error) {
+        console.error(error);
+        $('currentInviteExpiry').textContent = '招待コードを取得できませんでした';
+      }
+    }
+
+    function setIcon(id, name) {
+      const target = $(id);
+      target.innerHTML = target.classList.contains('icon') ? ICONS[name] : icon(name);
+    }
+    setIcon('loginBrandIcon', 'calendar'); setIcon('loginCloudIcon', 'cloud');
+    setIcon('registerLockIcon', 'lock'); setIcon('confirmLockIcon', 'lock'); setIcon('memberLoginLockIcon', 'lock');
+    setIcon('brandIcon', 'calendar'); setIcon('exportIcon', 'download'); setIcon('importIcon', 'upload'); setIcon('shareIcon', 'share');
+    setIcon('logoutIcon', 'logout');
+    setIcon('plusIcon', 'plus'); setIcon('searchIcon', 'search'); setIcon('infoIcon', 'info'); setIcon('monthCountIcon', 'calendar');
+    setIcon('memberCountIcon', 'users'); setIcon('nextEventIcon', 'clock'); setIcon('overallProgressIcon', 'progress');
+    setIcon('eventTasksIcon', 'check'); setIcon('progressTasksIcon', 'check');
+    setIcon('formCloseIcon', 'close'); setIcon('detailCloseIcon', 'close'); setIcon('progressCloseIcon', 'close');
+    setIcon('profileCloseIcon', 'close'); setIcon('membersCloseIcon', 'close'); setIcon('inviteCloseIcon', 'close'); setIcon('profileUsersIcon', 'users');
+    $('eventCategory').innerHTML = CATEGORIES.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+
+    $('previousMonth').addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1); renderAll(); });
+    $('nextMonth').addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1); renderAll(); });
+    $('todayButton').addEventListener('click', () => { const now = new Date(); viewDate = new Date(now.getFullYear(), now.getMonth(), 1); selectedDate = now; renderAll(); });
+    $('monthLabel').addEventListener('click', () => { if ($('monthPicker').showPicker) $('monthPicker').showPicker(); else $('monthPicker').click(); });
+    $('monthPicker').addEventListener('change', event => { if (!event.target.value) return; const [year, month] = event.target.value.split('-').map(Number); viewDate = new Date(year, month-1, 1); renderAll(); });
+    $('newEventButton').addEventListener('click', () => openEventForm(null, toDateString(selectedDate)));
+    $('addEventTask').addEventListener('click', () => addTaskRow('eventTasksEditor'));
+    $('addProgressTask').addEventListener('click', () => { addTaskRow('progressTasksEditor'); updateProgressEditSummary(); });
+    $('allDay').addEventListener('change', updateTimeFields);
+    $('searchInput').addEventListener('input', event => { searchQuery = event.target.value.trim(); renderAll(); });
+    $('exportButton').addEventListener('click', exportData);
+    $('importButton').addEventListener('click', () => $('importFile').click());
+    $('shareButton').addEventListener('click', openInviteDialog);
+    $('profileButton').addEventListener('click', openProfileEditor);
+    $('memberSummaryButton').addEventListener('click', () => { renderMembersList(); $('membersDialog').showModal(); });
+    $('editProfileButton').addEventListener('click', () => { $('membersDialog').close(); openProfileEditor(); });
+    $('deleteProfileButton').addEventListener('click', deleteCurrentMember);
+    $('logoutButton').addEventListener('click', async () => {
+      await supabase.auth.signOut({ scope: 'local' });
+      await lockCalendar();
+    });
+
+    document.querySelectorAll('[data-password-toggle]').forEach(button => button.addEventListener('click', () => {
+      const input = $(button.dataset.passwordToggle);
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      button.textContent = showing ? '表示' : '隠す';
+      button.setAttribute('aria-label', showing ? 'パスワードを表示' : 'パスワードを隠す');
+    }));
+
+    $('inviteCode').addEventListener('input', event => {
+      event.target.value = event.target.value.toUpperCase().replace(/[^A-Z2-9]/g, '').slice(0, 5);
+    });
+    $('inviteForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const button = $('inviteButton');
+      const inviteCode = $('inviteCode').value.trim().toUpperCase();
+      $('inviteError').textContent = '';
+      button.disabled = true;
+      button.textContent = '確認しています…';
+      try {
+        await invokeMemberAuth('verifyInvite', { inviteCode });
+        showAccountStep(inviteCode);
+      } catch (error) {
+        console.error(error);
+        $('inviteError').textContent = error.message || '招待コードを確認できませんでした。';
+        $('inviteCode').select();
+      } finally {
+        button.disabled = false;
+        button.textContent = '次へ進む';
+      }
+    });
+
+    $('registerTab').addEventListener('click', () => selectAccountMode('register'));
+    $('memberLoginTab').addEventListener('click', () => selectAccountMode('login'));
+    $('backToInvite').addEventListener('click', showInviteStep);
+
+    $('registerForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const displayName = $('registerName').value.trim();
+      const password = $('registerPassword').value;
+      const confirmPassword = $('registerPasswordConfirm').value;
+      const button = $('registerButton');
+      $('registerError').textContent = '';
+      if (password !== confirmPassword) {
+        $('registerError').textContent = '確認用パスワードが一致しません。';
+        return;
+      }
+      button.disabled = true;
+      button.textContent = '作成しています…';
+      try {
+        const data = await invokeMemberAuth('register', { displayName, password, inviteCode: verifiedInviteCode });
+        await establishSession(data.session);
+        toast('アカウントを作成しました');
+      } catch (error) {
+        console.error(error);
+        $('registerError').textContent = error.message || 'アカウントを作成できませんでした。';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'アカウントを作成';
+      }
+    });
+
+    $('memberLoginForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const displayName = $('memberLoginName').value.trim();
+      const password = $('memberLoginPassword').value;
+      const button = $('memberLoginButton');
+      $('memberLoginError').textContent = '';
+      button.disabled = true;
+      button.textContent = 'ログインしています…';
+      try {
+        const data = await invokeMemberAuth('login', { displayName, password });
+        await establishSession(data.session);
+        toast('ログインしました');
+      } catch (error) {
+        console.error(error);
+        $('memberLoginError').textContent = error.message || '名前またはパスワードが違います。';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'ログインして開く';
+      }
+    });
+
+    $('copyInviteCodeButton').addEventListener('click', () => copyText($('currentInviteCode').textContent, '招待コードをコピーしました'));
+    $('copyInviteLinkButton').addEventListener('click', () => copyText(location.href.split('#')[0], '招待リンクをコピーしました'));
+    $('profileForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const displayName = $('profileDisplayName').value.trim();
+      const submitButton = $('profileForm').querySelector('button[type="submit"]');
+      $('profileError').textContent = '';
+      if (!displayName) { $('profileError').textContent = 'アカウント名を入力してください。'; return; }
+      submitButton.disabled = true;
+      submitButton.textContent = '保存しています…';
+      try {
+        await invokeMemberAuth('rename', { displayName });
+        await loadMembersFromCloud();
+        $('profileDialog').close();
+        toast('アカウント名を変更しました');
+      } catch (error) {
+        console.error(error);
+        $('profileError').textContent = error.message || 'アカウント名を変更できませんでした。';
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = '名前を保存';
+      }
+    });
+    $('importFile').addEventListener('change', async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const data = JSON.parse(await file.text());
+        const replace = confirm('現在の予定を置き換えますか？\n\nOK：置き換える\nキャンセル：現在の予定に追加する');
+        await importData(data, replace);
+      } catch (error) { alert(`ファイルを読み込めませんでした。\n${error.message}`); }
+      event.target.value = '';
+    });
+
+    $('eventForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const id = $('eventId').value || uid();
+      const item = normalizeEvent({
+        id,
+        title: $('eventTitle').value,
+        date: $('eventDate').value,
+        allDay: $('allDay').checked,
+        start: $('allDay').checked ? '' : $('startTime').value,
+        end: $('allDay').checked ? '' : $('endTime').value,
+        category: $('eventCategory').value,
+        owner: $('eventOwner').value,
+        place: $('eventPlace').value,
+        members: $('eventMembers').value.split(/[、,]/).map(v => v.trim()).filter(Boolean),
+        memo: $('eventMemo').value,
+        tasks: collectTasks('eventTasksEditor')
+      });
+      if (!item) { alert('予定名と日付を入力してください。'); return; }
+      if (!item.allDay && item.start && item.end && item.end < item.start) { alert('終了時刻は開始時刻より後に設定してください。'); return; }
+      const editing = events.some(existing => existing.id === id);
+      const submitButton = $('eventForm').querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = '保存中…';
+      try {
+        await saveEventToCloud(item, editing);
+        viewDate = new Date(parseLocalDate(item.date).getFullYear(), parseLocalDate(item.date).getMonth(), 1);
+        selectedDate = parseLocalDate(item.date);
+        $('eventDialog').close();
+        renderAll();
+        toast(editing ? '予定を更新しました' : '予定を追加しました');
+      } catch (error) {
+        console.error(error);
+        alert(`予定を保存できませんでした。\n${error.message}`);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = '保存する';
+      }
+    });
+
+    $('progressForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const item = events.find(existing => existing.id === $('progressEventId').value);
+      if (!item) return;
+      const updated = normalizeEvent({ ...item, tasks: collectTasks('progressTasksEditor') });
+      const submitButton = $('progressForm').querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = '保存中…';
+      try {
+        await saveEventToCloud(updated, true);
+        $('progressDialog').close();
+        renderAll();
+        toast('進捗を更新しました');
+      } catch (error) {
+        console.error(error);
+        alert(`進捗を保存できませんでした。\n${error.message}`);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = '進捗を保存';
+      }
+    });
+
+    $('editEventButton').addEventListener('click', () => {
+      const event = events.find(item => item.id === selectedEventId);
+      if (!event) return;
+      $('detailDialog').close();
+      openEventForm(event);
+    });
+    $('deleteEventButton').addEventListener('click', () => deleteEvent(selectedEventId));
+    $('deleteFromForm').addEventListener('click', () => deleteEvent($('eventId').value));
+    document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => $(button.dataset.close).close()));
+    document.querySelectorAll('dialog').forEach(dialog => dialog.addEventListener('click', event => {
+      const box = dialog.querySelector('.dialog-card').getBoundingClientRect();
+      if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) dialog.close();
+    }));
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) lockCalendar();
+    });
+
+    async function initializeAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        await lockCalendar();
+        return;
+      }
+      try {
+        await unlockCalendar();
+      } catch (error) {
+        console.error(error);
+        await supabase.auth.signOut({ scope: 'local' });
+        await lockCalendar();
+      }
+    }
+
+    initializeAuth();
+  </script>
+</body>
+</html>
