@@ -547,6 +547,59 @@
       .dialog-card { padding: 18px; border-radius: 21px; }
       .dialog-actions { flex-wrap: wrap; }
     }
+    /* Responsive polish; calendar and account behavior stays unchanged. */
+    html { -webkit-text-size-adjust: 100%; }
+    .login-screen { overflow-y: auto; overflow-x: hidden; align-items: safe center; isolation: isolate; }
+    .login-card { isolation: isolate; }
+    .login-screen::before, .login-screen::after { z-index: -1; }
+    .login-copy, .progress-copy { line-height: 1.9; }
+    .login-note { text-align: center; line-height: 1.7; }
+    .login-warning { font-size: 12px; line-height: 1.8; }
+    .login-field > span { font-size: 12px; }
+    .password-wrap input { letter-spacing: .04em; }
+    .login-back { min-height: 44px; }
+    .panel { box-shadow: 0 16px 42px rgba(74,54,39,.075); }
+    .summary-icon, .brand-mark, .login-mark { flex-shrink: 0; }
+    .summary-card, .workspace > *, .progress-head > *, .detail-item { min-width: 0; }
+    .detail-item, .progress-edit-summary h3 { overflow-wrap: anywhere; }
+    .summary-card strong, .progress-ring strong { font-variant-numeric: tabular-nums; }
+    .button:disabled, .auth-tab:disabled { cursor: wait; opacity: .65; transform: none; }
+    .dialog-card { max-height: calc(100dvh - 32px); overscroll-behavior: contain; }
+    .toast { max-width: calc(100vw - 32px); text-align: center; line-height: 1.6; }
+    @media (min-width: 1121px) and (max-width: 1200px) {
+      .workspace { grid-template-columns: minmax(0, 1fr) 320px; }
+    }
+    @media (max-width: 760px) {
+      .login-screen { padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+      .login-card { padding: 28px 22px; margin-block: auto; }
+      .login-brand-name { font-size: clamp(17px, 5vw, 20px); }
+      .login-title { font-size: clamp(24px, 7vw, 29px); }
+      .login-field input:not(.invite-code-input), .field input, .field select,
+      .field textarea, .task-row input[type="text"], .search-box input { font-size: 16px; }
+      .topbar { flex-wrap: wrap; gap: 12px; background: rgba(255,253,249,.96); }
+      .topbar .brand { width: 100%; }
+      .top-actions { width: 100%; justify-content: space-between; flex-wrap: nowrap; gap: 6px; }
+      .top-actions .button { width: 44px; min-height: 44px; flex-shrink: 0; }
+      .hero { padding-top: 26px; }
+      .hero h1 { font-size: clamp(28px, 8vw, 35px); line-height: 1.35; }
+      .month-toolbar { grid-template-columns: 42px minmax(0, 1fr) 42px auto; gap: 6px; }
+      .nav-button { width: 42px; }
+      .today-button { padding-inline: 12px; }
+      .month-label { font-size: clamp(14px, 4vw, 17px); letter-spacing: .02em; }
+      .calendar-head-note { font-size: 11px; line-height: 1.7; }
+      .summary-card { padding: 12px 14px; }
+      .progress-copy, .list-meta { font-size: 12px; }
+      .progress-card { padding: 16px; }
+      .dialog-actions-right { flex-wrap: wrap; justify-content: flex-end; }
+      .dialog-title { font-size: 24px; }
+      .dialog-card { max-height: calc(100dvh - 24px); }
+      .login-screen::before, .login-screen::after { opacity: .14; }
+      .toast { bottom: max(20px, env(safe-area-inset-bottom)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+    }
     @media print {
       body { background: white; }
       body::before, .leaf-art, .topbar, .category-bar, .side-panel, .tips, .share-banner { display: none !important; }
